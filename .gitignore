@@ -32,6 +32,9 @@ report.html
 figures/
 slides.md
 
+# --- Personal (kept local, never published) ---
+STUDY-GUIDE.md
+
 # --- Working artifacts ---
 *.backup.*
 *.tmp
