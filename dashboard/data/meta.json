@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-07-13T17:26:59+00:00",
+  "snapshots": [
+    "2026-07-07"
+  ],
+  "countries": [
+    "IT"
+  ],
+  "sectors": [
+    "banking_insurance",
+    "ecommerce",
+    "health",
+    "media_lifestyle",
+    "news",
+    "pa",
+    "publishing_education",
+    "real_estate",
+    "telco_utilities",
+    "travel_tourism"
+  ],
+  "crawlers": [
+    "AI2Bot",
+    "Amazonbot",
+    "Applebot-Extended",
+    "Bytespider",
+    "CCBot",
+    "ChatGPT-User",
+    "Claude-SearchBot",
+    "Claude-User",
+    "ClaudeBot",
+    "Diffbot",
+    "FacebookBot",
+    "GPTBot",
+    "Google-Extended",
+    "MistralAI-User",
+    "OAI-SearchBot",
+    "Perplexity-User",
+    "PerplexityBot",
+    "anthropic-ai",
+    "cohere-ai",
+    "meta-externalagent"
+  ],
+  "operators": [
+    "Allen Institute",
+    "Amazon",
+    "Anthropic",
+    "Apple",
+    "ByteDance",
+    "Cohere",
+    "Common Crawl",
+    "Diffbot",
+    "Google",
+    "Meta",
+    "Mistral",
+    "OpenAI",
+    "Perplexity"
+  ]
+}

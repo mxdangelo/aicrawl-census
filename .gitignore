@@ -35,6 +35,9 @@ slides.md
 # --- Personal (kept local, never published) ---
 STUDY-GUIDE.md
 
+# --- Dashboard: local preview render (throwaway) ---
+dashboard/_preview.html
+
 # --- Working artifacts ---
 *.backup.*
 *.tmp
