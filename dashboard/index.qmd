@@ -1,0 +1,61 @@
+---
+title: "AI Crawler Observatory · Italy"
+format:
+  dashboard:
+    theme: [cosmo, theme.scss]
+    orientation: rows
+    nav-buttons:
+      - icon: github
+        href: https://github.com/mxdangelo/aicrawl-census
+---
+
+```{python}
+#| include: false
+import json
+import pandas as pd
+import charts
+
+df = pd.read_parquet("data/policy_facts.parquet")
+sig = pd.read_parquet("data/sector_signals.parquet")
+meta = json.load(open("data/meta.json", encoding="utf-8"))
+
+n_domains = int(sig["n_domains"].sum())
+n_crawlers = len(meta["crawlers"])
+snapshot = meta["snapshots"][-1]
+gpt_blocked = int(df[(df.crawler == "GPTBot") & (df.verdict == "blocked")
+                     & (df.source == "specific")]["n_domains"].sum())
+gpt_pct = gpt_blocked / n_domains
+```
+
+## Row {height="18%"}
+
+```{python}
+#| content: valuebox
+#| title: "Domains surveyed"
+dict(icon="globe2", color="primary", value=n_domains)
+```
+
+```{python}
+#| content: valuebox
+#| title: "AI crawlers tracked"
+dict(icon="robot", color="light", value=n_crawlers)
+```
+
+```{python}
+#| content: valuebox
+#| title: "Specifically block GPTBot"
+dict(icon="shield-lock", color="light", value=f"{gpt_pct:.1%}")
+```
+
+```{python}
+#| content: valuebox
+#| title: "Latest snapshot"
+dict(icon="calendar3", color="light", value=snapshot)
+```
+
+## Row
+
+```{python}
+#| title: "Verdict mix by crawler — slice by sector and source"
+charts.verdict_by_crawler(df)
+```

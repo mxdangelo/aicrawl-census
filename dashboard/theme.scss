@@ -1,0 +1,14 @@
+/*-- scss:defaults --*/
+// Palette salvaged from the visual study (validated reference instance).
+$primary:   #2a78d6;
+$body-color: #1a1a19;
+$link-color: #2a78d6;
+$font-family-sans-serif: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+/*-- scss:rules --*/
+.quarto-dashboard .card {
+  border-radius: 8px;
+}
+.quarto-dashboard .valuebox-title {
+  font-weight: 500;
+}

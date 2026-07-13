@@ -38,6 +38,12 @@ STUDY-GUIDE.md
 # --- Dashboard: local preview render (throwaway) ---
 dashboard/_preview.html
 
+# --- Quarto build artifacts ---
+dashboard/_site/
+dashboard/.quarto/
+/.quarto/
+.jupyter_cache/
+
 # --- Working artifacts ---
 *.backup.*
 *.tmp
