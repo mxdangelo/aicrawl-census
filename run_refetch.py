@@ -14,16 +14,14 @@ import json
 from curl_cffi import requests as creq
 
 import config
-from censuslib import db
+from censuslib import db, net
 
-SUSPECT_STATUS = (0, 202, 403, 429, 503)
 WORKERS = 8
 
 
 def refetch(job):
     domain, resource, path = job
-    hosts = [domain] if domain.startswith("www.") else [domain, f"www.{domain}"]
-    for host in hosts:
+    for host in net.candidate_hosts(domain):
         try:
             r = creq.get(f"https://{host}{path}", impersonate="chrome",
                          timeout=config.TIMEOUT, allow_redirects=True)
@@ -43,10 +41,10 @@ def refetch(job):
 
 def main():
     con = db.connect(config.DB_PATH)
-    ph = ",".join("?" * len(SUSPECT_STATUS))
+    ph = ",".join("?" * len(config.SHIELDED_STATUS))
     jobs = [(d, res, config.RESOURCES[res]) for d, res in con.execute(
         f"SELECT domain, resource FROM fetches WHERE status IN ({ph})",
-        SUSPECT_STATUS)]
+        config.SHIELDED_STATUS)]
     print(f"{len(jobs)} suspect rows, retrying with Chrome impersonation...")
 
     recovered = 0
@@ -55,10 +53,7 @@ def main():
             if res is None:
                 continue
             recovered += 1
-            con.execute(
-                "INSERT OR REPLACE INTO fetches VALUES "
-                "(:domain,:resource,:final_url,:status,:content_type,"
-                ":redirects,:body,:headers_json,:error,:ts,:client)", res)
+            db.upsert_fetch(con, res)
     con.commit()
     print(f"Recovered {recovered}/{len(jobs)} rows "
           f"(any response counts, including 404).")

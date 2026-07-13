@@ -61,3 +61,12 @@ def connect(path):
     con = sqlite3.connect(path)
     con.executescript(SCHEMA)
     return con
+
+
+def upsert_fetch(con, row):
+    """Insert or replace one fetches row (keyed on domain, resource). `row` is
+    a dict with all fetches columns. Shared by run_fetch and run_refetch."""
+    con.execute(
+        "INSERT OR REPLACE INTO fetches VALUES "
+        "(:domain,:resource,:final_url,:status,:content_type,"
+        ":redirects,:body,:headers_json,:error,:ts,:client)", row)

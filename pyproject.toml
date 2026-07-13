@@ -1,0 +1,9 @@
+[tool.ruff]
+line-length = 99
+target-version = "py311"
+# Legacy static-report layer: kept locally as reference (palette/theme tokens
+# to be salvaged into the Quarto dashboard), not tracked in the repo.
+extend-exclude = ["run_report.py", "run_figures.py"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F"]

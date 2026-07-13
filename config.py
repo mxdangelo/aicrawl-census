@@ -33,6 +33,12 @@ AI_CRAWLERS = {
 CONCURRENCY = 15
 TIMEOUT = 15.0
 RETRIES = 2
+
+# HTTP outcomes that mean "no usable answer": DNS/connection failure (0),
+# tarpit/queue (202), and the blocks a WAF returns to non-browser TLS
+# (403/429/503). run_refetch.py retries these with browser impersonation;
+# run_dw.py treats them as not observable. Single source to avoid drift.
+SHIELDED_STATUS = (0, 202, 403, 429, 503)
 USER_AGENT = (
     "Mozilla/5.0 (compatible; AICrawlCensus/0.1; academic research; "
     "+mailto:mxdangelo.seo@gmail.com)"

@@ -22,6 +22,16 @@ env/
 .DS_Store
 Thumbs.db
 
+# --- Legacy static-report layer (kept local as reference) ---
+# Superseded by the data-driven (Altair/Quarto) dashboard. The hand-drawn SVG
+# generator describes one snapshot and doesn't scale to periodic injections;
+# only its validated palette will be salvaged into the dashboard theme.
+run_report.py
+run_figures.py
+report.html
+figures/
+slides.md
+
 # --- Working artifacts ---
 *.backup.*
 *.tmp

@@ -18,8 +18,6 @@ python run_refetch.py            # stage 1b: retry shielded domains (curl_cffi,
 python run_parse.py              # stage 2+3: validation, parsing, verdicts
 python run_cluster.py            # stage 4: template clustering
 python run_dw.py                 # stage 5: star-schema DW layer (dw_* tables)
-python run_report.py             # stage 6: visual study (report.html) —
-                                 #          needs the DW tables, run 5 first
 python test_parsers.py           # parser tests
 ```
 
@@ -58,8 +56,9 @@ Output: `census.db` (SQLite). Main tables:
 - `dw_dim_domain` / `dw_dim_crawler` / `dw_fact_policy` — star schema for
   BI queries (grain: domain × crawler), rebuilt idempotently by run_dw.py.
 
-Artifacts: `report.html` (self-contained visual study, stage 6) and
-`slides.md` (20-slide presentation draft mapped to the homework spec).
+Dashboard: a data-driven observatory (Altair/Vega-Lite + Quarto, published to
+GitHub Pages) is in construction — designed to scale across periodic snapshots
+(temporal dimension) and multiple countries.
 
 ## Design decisions
 

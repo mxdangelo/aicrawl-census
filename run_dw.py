@@ -51,13 +51,14 @@ def main():
             "INSERT INTO dw_dim_crawler (crawler, operator, purpose) "
             "VALUES (?,?,?)", (crawler, operator, purpose))
 
-    con.execute("""
+    shielded_in = ",".join(str(s) for s in config.SHIELDED_STATUS)
+    con.execute(f"""
         INSERT INTO dw_dim_domain (domain, sector, cms, seo_plugin, cdn,
             observable, robots_present, llms_present, llms_full_present,
             tdmrep_present, llms_origin, llms_has_instructions,
             ai_template_cluster, ai_cluster_size)
         SELECT s.domain, s.sector, s.cms, s.seo_plugin, s.cdn,
-            (SELECT status NOT IN (0,202,403,429,503) FROM fetches
+            (SELECT status NOT IN ({shielded_in}) FROM fetches
               WHERE domain=s.domain AND resource='robots'),
             COALESCE((SELECT present FROM files
                       WHERE domain=s.domain AND resource='robots'), 0),

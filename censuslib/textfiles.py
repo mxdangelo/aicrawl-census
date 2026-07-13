@@ -103,7 +103,7 @@ def text_similarity(a: str, b: str) -> float:
     (facile.it writes '#Title' in one file and '# Title' in the other)."""
     def shingles(t):
         # strip markdown line prefixes (#, >, list bullets) before tokenizing
-        lines = (re.sub(r"^[#>*\-\s]+", "", l) for l in t.lower().splitlines())
+        lines = (re.sub(r"^[#>*\-\s]+", "", ln) for ln in t.lower().splitlines())
         w = " ".join(lines).split()
         if len(w) <= 5:
             return {tuple(w)} if w else set()

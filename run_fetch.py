@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 import httpx
 
 import config
-from censuslib import db
+from censuslib import db, net
 
 
 async def _get(client, url):
@@ -30,12 +30,8 @@ async def _get(client, url):
 
 
 async def fetch_one(client, sem, domain, resource, path):
-    # bare domains that don't resolve (common for PA sites) fall back to www.
-    hosts = [domain]
-    if not domain.startswith("www."):
-        hosts.append(f"www.{domain}")
     async with sem:
-        for host in hosts:
+        for host in net.candidate_hosts(domain):
             url = f"https://{host}{path}"
             r = await _get(client, url)
             if not isinstance(r, Exception):
@@ -97,10 +93,7 @@ async def main(limit, only_missing):
         n = 0
         for coro in asyncio.as_completed(tasks):
             res = await coro
-            con.execute(
-                "INSERT OR REPLACE INTO fetches VALUES "
-                "(:domain,:resource,:final_url,:status,:content_type,"
-                ":redirects,:body,:headers_json,:error,:ts,:client)", res)
+            db.upsert_fetch(con, res)
             n += 1
             if n % 100 == 0:
                 con.commit()
