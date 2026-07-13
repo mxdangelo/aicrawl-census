@@ -1,0 +1,27 @@
+# --- Data: heavy raw layer (exceeds GitHub's 100 MB limit; re-derivable) ---
+# census.db is the full source layer (raw bodies/headers, ~320 MB).
+# Everything downstream is rebuilt from it, and the shippable snapshot is
+# census-lite.db (tracked). Keep the heavy DB local.
+census.db
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# --- Local tooling / editor ---
+.claude/settings.local.json
+.vscode/
+.idea/
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Working artifacts ---
+*.backup.*
+*.tmp
