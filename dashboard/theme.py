@@ -5,8 +5,6 @@ categorical blue/green tuned for CVD contrast, and a 7-step sequential blue ramp
 Charts render on a transparent background so the page (Quarto light/dark) shows
 through; ink/grid use mid-tones that stay legible on both.
 """
-import altair as alt
-
 ACCENT = "#1a1a19"      # observatory signature (ink); used sparingly, for emphasis
 BAR_GRAY = "#cbc9c2"    # de-emphasised bars in an emphasis chart
 GRAY = "#b5b3ab"

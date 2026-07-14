@@ -103,15 +103,20 @@ def build(db_path, snapshot_date, country):
 def _write_meta(con):
     """Small manifest for the dashboard: available filters and provenance."""
     facts = str(OUT / "policy_facts.parquet")
-    scalar = lambda q: [r[0] for r in con.execute(q).fetchall()]
+
+    def distinct(col):
+        return [r[0] for r in con.execute(
+            f"SELECT DISTINCT {col} FROM read_parquet('{facts}') "
+            "ORDER BY 1").fetchall()]
+
     meta = {
         "generated_at": dt.datetime.now(dt.timezone.utc)
                           .isoformat(timespec="seconds"),
-        "snapshots": scalar(f"SELECT DISTINCT snapshot_date FROM read_parquet('{facts}') ORDER BY 1"),
-        "countries": scalar(f"SELECT DISTINCT country FROM read_parquet('{facts}') ORDER BY 1"),
-        "sectors":   scalar(f"SELECT DISTINCT sector FROM read_parquet('{facts}') ORDER BY 1"),
-        "crawlers":  scalar(f"SELECT DISTINCT crawler FROM read_parquet('{facts}') ORDER BY 1"),
-        "operators": scalar(f"SELECT DISTINCT operator FROM read_parquet('{facts}') ORDER BY 1"),
+        "snapshots": distinct("snapshot_date"),
+        "countries": distinct("country"),
+        "sectors": distinct("sector"),
+        "crawlers": distinct("crawler"),
+        "operators": distinct("operator"),
     }
     (OUT / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
