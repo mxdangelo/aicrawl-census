@@ -16,14 +16,19 @@ import json
 import pandas as pd
 import charts
 
-df = pd.read_parquet("data/policy_facts.parquet")
-sig = pd.read_parquet("data/sector_signals.parquet")
 meta = json.load(open("data/meta.json", encoding="utf-8"))
+snapshot = meta["snapshots"][-1]
+n_snapshots = len(meta["snapshots"])
+
+# The parquet tables accumulate every snapshot; these sections read the latest.
+df = pd.read_parquet("data/policy_facts.parquet").query("snapshot_date == @snapshot")
+sig = pd.read_parquet("data/sector_signals.parquet").query("snapshot_date == @snapshot")
 
 n_domains = int(sig["n_domains"].sum())
 n_sectors = len(meta["sectors"])
 n_crawlers = len(meta["crawlers"])
-snapshot = meta["snapshots"][-1]
+snapshot_label = (f"snapshot {snapshot}" if n_snapshots == 1
+                  else f"snapshot {n_snapshots} · {snapshot}")
 ```
 
 ::: {.kicker}
@@ -46,7 +51,7 @@ The observatory tracks three signals Italian sites send AI — whether they
 :::
 
 ::: {.dateline}
-`{python} n_domains` domains · `{python} n_sectors` sectors · `{python} n_crawlers` crawlers · snapshot `{python} snapshot` · [Method →](#method)
+`{python} n_domains` domains · `{python} n_sectors` sectors · `{python} n_crawlers` crawlers · `{python} snapshot_label` · [Method →](#method)
 :::
 
 ## Block {#block}

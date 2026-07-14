@@ -20,6 +20,8 @@ python run_refetch.py            # stage 1b: retry shielded domains (curl_cffi,
 python run_parse.py              # stage 2+3: validation, parsing, verdicts
 python run_cluster.py            # stage 4: template clustering
 python run_dw.py                 # stage 5: star-schema DW layer (dw_* tables)
+python build_lite.py             # stage 6: census-lite.db, the tracked snapshot
+                                 #          (census.db minus raw bodies)
 python test_parsers.py           # parser tests
 ```
 
