@@ -33,7 +33,10 @@ figures/
 slides.md
 
 # --- Personal (kept local, never published) ---
+# Homework artifacts from the course this study started as — out of place on a
+# public observatory. Kept on disk, never tracked.
 STUDY-GUIDE.md
+presentazione_homerwork_1_dangelo.pptx
 
 # --- Dashboard: local preview render (throwaway) ---
 dashboard/_preview.html
