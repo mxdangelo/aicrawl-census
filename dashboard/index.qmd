@@ -39,7 +39,7 @@ AI Crawler Observatory · Italy
 In Italy, resistance to AI crawlers is concentrated in one sector: the press.
 :::
 
-News blocks OpenAI's GPTBot at 31% and media at 21%; no other sector exceeds 10%. 8.8% overall.
+News blocks OpenAI's GPTBot at 31% and media at 21%; no other sector exceeds 10%. 9.0% overall.
 
 ```{python}
 charts.block_by_sector(df)
@@ -70,9 +70,9 @@ charts.verdict_by_crawler(df, default_source="specific")
 
 The opposite move. **llms.txt** (a 2024 convention) is a Markdown file that
 *offers* a curated view of a site to language models — "here is what to read
-about us." Almost nobody uses it: **42 of 543 sites, under 8%**. And the lead is
-an unexpected sector — **banking**, where 1 in 4 sites publishes one, and every
-one is hand-written, not shipped by a plugin. Ink marks a deliberate file;
+about us." Almost nobody uses it: **46 of 543 sites, 8.5%**. And the lead is
+an unexpected sector — **banking**, where more than 1 in 4 sites publish one,
+and every one is hand-written, not shipped by a plugin. Ink marks a deliberate file;
 gray, a plugin default.
 
 ```{python}
