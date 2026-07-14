@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "AI Crawler Observatory · Italy",
     "section": "",
-    "text": "AI Crawler Observatory · Italy\nNews blocks OpenAI’s GPTBot at 31% and media at 21%; no other sector exceeds 10%. 8.8% overall."
+    "text": "AI Crawler Observatory · Italy\nNews blocks OpenAI’s GPTBot at 31% and media at 21%; no other sector exceeds 10%. 9.0% overall."
   },
   {
     "objectID": "index.html#block",
@@ -18,7 +18,7 @@
     "href": "index.html#offer",
     "title": "AI Crawler Observatory · Italy",
     "section": "Offer",
-    "text": "Offer\nThe opposite move. llms.txt (a 2024 convention) is a Markdown file that offers a curated view of a site to language models — “here is what to read about us.” Almost nobody uses it: 42 of 543 sites, under 8%. And the lead is an unexpected sector — banking, where 1 in 4 sites publishes one, and every one is hand-written, not shipped by a plugin. Ink marks a deliberate file; gray, a plugin default."
+    "text": "Offer\nThe opposite move. llms.txt (a 2024 convention) is a Markdown file that offers a curated view of a site to language models — “here is what to read about us.” Almost nobody uses it: 46 of 543 sites, 8.5%. And the lead is an unexpected sector — banking, where more than 1 in 4 sites publish one, and every one is hand-written, not shipped by a plugin. Ink marks a deliberate file; gray, a plugin default."
   },
   {
     "objectID": "index.html#reserve",
@@ -32,6 +32,6 @@
     "href": "index.html#method",
     "title": "AI Crawler Observatory · Italy",
     "section": "Method",
-    "text": "Method\nThe sample. 543 Italian websites, stratified across 10 sectors, drawn from hand-curated sector lists cross-checked against the Tranco top-1M list filtered to .it. Latest snapshot: 2026-07-07. The observatory is built to re-run: each crawl is one snapshot, so the same measures can be tracked over time and, later, across countries.\nThe three signals. For every site we fetch and validate three files:\n\nrobots.txt, parsed under RFC 9309 (longest-match, Allow wins ties). A crawler’s verdict is blocked when the root path is denied, partial when only some paths are, allowed otherwise. A rule is specific when the site names the crawler, wildcard when it comes from a catch-all User-agent: *.\nllms.txt, a Markdown file offering content to models. Hand-written vs plugin default is inferred from generator signatures and near-duplicate detection across sites.\ntdmrep.json / TDMRep, the EU legal reservation, read through all three spec channels (a well-known file, HTTP headers, and HTML meta tags).\n\nPresence is validated, never assumed. A 200 OK proves nothing — many servers answer 200 with an HTML page on any path. A file counts only if it is structurally valid; soft-404s are excluded.\nLimits. robots.txt measures declared intent, not crawler behaviour. The CMS/plugin fingerprint is heuristic. “Not mentioned” is a default, not a decision, and is kept separate from explicit permission throughout.\nData & code. 20 AI crawlers are tracked. The full pipeline and the aggregated snapshot data are open: github.com/mxdangelo/aicrawl-census."
+    "text": "Method\nThe sample. 543 Italian websites, stratified across 10 sectors, drawn from hand-curated sector lists cross-checked against the Tranco top-1M list filtered to .it. Latest snapshot: 2026-07-14. The observatory is built to re-run: each crawl is one snapshot, so the same measures can be tracked over time and, later, across countries.\nThe three signals. For every site we fetch and validate three files:\n\nrobots.txt, parsed under RFC 9309 (longest-match, Allow wins ties). A crawler’s verdict is blocked when the root path is denied, partial when only some paths are, allowed otherwise. A rule is specific when the site names the crawler, wildcard when it comes from a catch-all User-agent: *.\nllms.txt, a Markdown file offering content to models. Hand-written vs plugin default is inferred from generator signatures and near-duplicate detection across sites.\ntdmrep.json / TDMRep, the EU legal reservation, read through all three spec channels (a well-known file, HTTP headers, and HTML meta tags).\n\nPresence is validated, never assumed. A 200 OK proves nothing — many servers answer 200 with an HTML page on any path. A file counts only if it is structurally valid; soft-404s are excluded.\nLimits. robots.txt measures declared intent, not crawler behaviour. The CMS/plugin fingerprint is heuristic. “Not mentioned” is a default, not a decision, and is kept separate from explicit permission throughout.\nData & code. 20 AI crawlers are tracked. The full pipeline and the aggregated snapshot data are open: github.com/mxdangelo/aicrawl-census."
   }
 ]
