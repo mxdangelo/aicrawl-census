@@ -5,6 +5,8 @@ of Italian domains. Three signals, three semantics: technical convention
 (robots), offer to LLMs (llms.txt), legal reservation under Art. 4 CDSM
 (TDMRep).
 
+**Live observatory → https://mxdangelo.github.io/aicrawl-census/**
+
 ## Usage
 
 ```bash
@@ -56,9 +58,11 @@ Output: `census.db` (SQLite). Main tables:
 - `dw_dim_domain` / `dw_dim_crawler` / `dw_fact_policy` — star schema for
   BI queries (grain: domain × crawler), rebuilt idempotently by run_dw.py.
 
-Dashboard: a data-driven observatory (Altair/Vega-Lite + Quarto, published to
-GitHub Pages) is in construction — designed to scale across periodic snapshots
-(temporal dimension) and multiple countries.
+Dashboard: a data-driven observatory (Altair + Quarto), **live at
+[mxdangelo.github.io/aicrawl-census](https://mxdangelo.github.io/aicrawl-census/)**
+— block / offer / reserve across Italian sectors, built to scale over periodic
+snapshots (temporal dimension) and multiple countries. Build locally:
+`python dashboard/build_data.py` then `quarto render dashboard/index.qmd`.
 
 ## Design decisions
 
