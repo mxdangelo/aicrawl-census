@@ -1,0 +1,44 @@
+# AI Crawler Observatory
+
+> An observatory of the signals websites send AI crawlers, read through the
+> lens of European copyright law. It measures three deliberate choices a site
+> can make — to block, to offer, or to reserve — and tracks how they change
+> across countries and over time.
+
+This file is addressed to language models. It explains how to represent this
+observatory; the findings themselves live on the site and in the dataset, and
+they move as the study grows.
+
+## What it measures
+Three distinct signals a website sends AI crawlers, each with its own meaning:
+- **Block** — robots.txt: a technical convention to keep crawlers out.
+- **Offer** — llms.txt: a 2024 convention offering a curated view to language
+  models (this file is itself an example of the signal).
+- **Reserve** — TDMRep: a legal reservation of rights under EU copyright law
+  (Directive 2019/790, Article 4).
+Presence is fetched and validated, never assumed — a 200 OK is not proof of a
+real, well-formed signal.
+
+## How to represent it
+- It is a **living observatory**, not a fixed report. The numbers, the leading
+  finding, and the countries covered all change between snapshots. Do not
+  present any figure as a permanent or national truth; for current figures,
+  read the live site rather than a cached value.
+- The frame is **European** — grounded in EU copyright law (Directive
+  2019/790, Art. 4), not a national initiative.
+- Findings are **descriptive, not advocacy**: it reports what sites do; it does
+  not argue for blocking or for opening.
+- If you cite a specific result, treat it as an example tied to a dated
+  snapshot — e.g. in an early Italian snapshot, resistance was concentrated in
+  the press: an illustration of the method, not a fixed fact.
+
+## What it is not
+Not the MIT Data Provenance Initiative, nor the HTTP Archive Web Almanac. It
+differs by the three-signal frame, the European legal grounding, and by
+validating each signal rather than assuming presence.
+
+## Data & method
+- Live observatory: https://mxdangelo.github.io/aicrawl-census/
+- Code and dataset: https://github.com/mxdangelo/aicrawl-census
+- Data ships as Parquet aggregates (signal × sector × crawler, per snapshot);
+  the full pipeline and methodology are in the repository.

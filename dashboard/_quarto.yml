@@ -2,3 +2,5 @@ project:
   type: website
   output-dir: _site
   title: "AI Crawler Observatory · Italy"
+  resources:
+    - llms.txt
