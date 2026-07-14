@@ -1,16 +1,17 @@
 ---
 title: "AI Crawler Observatory · Italy"
 format:
-  dashboard:
+  html:
     theme: [cosmo, theme.scss]
-    orientation: rows
-    nav-buttons:
-      - icon: github
-        href: https://github.com/mxdangelo/aicrawl-census
+    page-layout: article
+    toc: false
+    anchor-sections: false
+execute:
+  echo: false
+  warning: false
 ---
 
 ```{python}
-#| include: false
 import json
 import pandas as pd
 import charts
@@ -20,42 +21,120 @@ sig = pd.read_parquet("data/sector_signals.parquet")
 meta = json.load(open("data/meta.json", encoding="utf-8"))
 
 n_domains = int(sig["n_domains"].sum())
+n_sectors = len(meta["sectors"])
 n_crawlers = len(meta["crawlers"])
 snapshot = meta["snapshots"][-1]
-gpt_blocked = int(df[(df.crawler == "GPTBot") & (df.verdict == "blocked")
-                     & (df.source == "specific")]["n_domains"].sum())
-gpt_pct = gpt_blocked / n_domains
 ```
 
-## Row {height="18%"}
+::: {.kicker}
+AI Crawler Observatory · Italy
+:::
+
+::: {.lead}
+In Italy, resistance to AI crawlers is concentrated in one sector: the press.
+:::
+
+News blocks OpenAI's GPTBot at 31% and media at 21%; no other sector exceeds 10%. 8.8% overall.
 
 ```{python}
-#| content: valuebox
-#| title: "Domains surveyed"
-dict(icon="globe2", color="primary", value=n_domains)
+charts.block_by_sector(df)
 ```
+
+::: {.scope}
+The observatory tracks three signals Italian sites send AI — whether they
+**block** crawlers, **offer** content, or **reserve** their rights.
+:::
+
+::: {.dateline}
+`{python} n_domains` domains · `{python} n_sectors` sectors · `{python} n_crawlers` crawlers · snapshot `{python} snapshot` · [Method →](#method)
+:::
+
+## Block {#block}
+
+Sites keep AI crawlers out through **robots.txt** — a plain-text file that can
+name a crawler and disallow paths. Each bar is one crawler; the split shows how
+the 543 sites treat it: **blocked** at the root, **partial** (some paths off
+limits), or **allowed**. Use the menus to slice by sector, or by whether a rule
+*names the crawler* or comes from a catch-all `*`.
 
 ```{python}
-#| content: valuebox
-#| title: "AI crawlers tracked"
-dict(icon="robot", color="light", value=n_crawlers)
+charts.verdict_by_crawler(df, default_source="specific")
 ```
+
+## Offer {#offer}
+
+The opposite move. **llms.txt** (a 2024 convention) is a Markdown file that
+*offers* a curated view of a site to language models — "here is what to read
+about us." Almost nobody uses it: **42 of 543 sites, under 8%**. And the lead is
+an unexpected sector — **banking**, where 1 in 4 sites publishes one, and every
+one is hand-written, not shipped by a plugin. Ink marks a deliberate file;
+gray, a plugin default.
 
 ```{python}
-#| content: valuebox
-#| title: "Specifically block GPTBot"
-dict(icon="shield-lock", color="light", value=f"{gpt_pct:.1%}")
+charts.offer_by_sector(sig)
 ```
+
+## Reserve {#reserve}
+
+The legal one. Under EU copyright law (Directive 2019/790, Article 4), AI
+companies may text-and-data-mine public content for training **unless the owner
+reserves the right in a machine-readable form**. **TDMRep** is that reservation —
+the only one of the three signals with legal weight in the EU. Just **8 of 543
+sites** assert it, and they cluster in the industries that live on copyright:
+book publishers and universities (6), and the press (2). Every other sector: none.
 
 ```{python}
-#| content: valuebox
-#| title: "Latest snapshot"
-dict(icon="calendar3", color="light", value=snapshot)
+charts.reserve_dotgrid(sig)
 ```
 
-## Row
+## Method {#method}
 
-```{python}
-#| title: "Verdict mix by crawler — slice by sector and source"
-charts.verdict_by_crawler(df)
+**The sample.** `{python} n_domains` Italian websites, stratified across
+`{python} n_sectors` sectors, drawn from hand-curated sector lists cross-checked
+against the Tranco top-1M list filtered to `.it`. Latest snapshot:
+`{python} snapshot`. The observatory is built to re-run: each crawl is one
+snapshot, so the same measures can be tracked over time and, later, across
+countries.
+
+**The three signals.** For every site we fetch and *validate* three files:
+
+- **robots.txt**, parsed under RFC 9309 (longest-match, `Allow` wins ties). A
+  crawler's verdict is **blocked** when the root path is denied, **partial**
+  when only some paths are, **allowed** otherwise. A rule is *specific* when the
+  site names the crawler, *wildcard* when it comes from a catch-all
+  `User-agent: *`.
+- **llms.txt**, a Markdown file offering content to models. *Hand-written* vs
+  *plugin default* is inferred from generator signatures and near-duplicate
+  detection across sites.
+- **tdmrep.json / TDMRep**, the EU legal reservation, read through all three
+  spec channels (a well-known file, HTTP headers, and HTML meta tags).
+
+**Presence is validated, never assumed.** A `200 OK` proves nothing — many
+servers answer 200 with an HTML page on any path. A file counts only if it is
+structurally valid; soft-404s are excluded.
+
+**Limits.** robots.txt measures *declared intent*, not crawler behaviour. The
+CMS/plugin fingerprint is heuristic. "Not mentioned" is a default, not a
+decision, and is kept separate from explicit permission throughout.
+
+**Data & code.** `{python} n_crawlers` AI crawlers are tracked. The full pipeline
+and the aggregated snapshot data are open:
+[github.com/mxdangelo/aicrawl-census](https://github.com/mxdangelo/aicrawl-census).
+
+```{=html}
+<script>
+(function () {
+  var targets = document.querySelectorAll('main section.level2');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!('IntersectionObserver' in window) || reduce) return;   // graceful: stay visible
+  targets.forEach(function (el) { el.classList.add('reveal'); });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+  targets.forEach(function (el) { io.observe(el); });
+})();
+</script>
 ```
+

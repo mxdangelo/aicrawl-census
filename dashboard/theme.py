@@ -7,17 +7,18 @@ through; ink/grid use mid-tones that stay legible on both.
 """
 import altair as alt
 
-BLUE = "#2a78d6"
-GREEN = "#1baf7a"
+ACCENT = "#1a1a19"      # observatory signature (ink); used sparingly, for emphasis
+BAR_GRAY = "#cbc9c2"    # de-emphasised bars in an emphasis chart
 GRAY = "#b5b3ab"
-INK = "#52514e"
+INK = "#52514e"         # secondary text ink (labels, values)
 MUTED = "#898781"
-GRID = "#d9d8d1"
+GRID = "#e6e4dd"
 FONT = "system-ui, -apple-system, 'Segoe UI', sans-serif"
 
-# Verdict scale: kept inside the validated blue ramp + a neutral, no new hue.
+# Verdict is an ordered scale (blocked > partial > allowed): one-hue ink ramp,
+# darker = more restricted. "blocked" carries the signature ink.
 VERDICT_DOMAIN = ["blocked", "partial", "allowed"]
-VERDICT_RANGE = ["#2a78d6", "#9ec5f4", "#d8d6cf"]
+VERDICT_RANGE = ["#1a1a19", "#a7a59e", "#dcdad3"]
 
 # Sequential blue ramp (e.g. share-blocked heatmaps).
 SEQ = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
@@ -32,9 +33,10 @@ def themed(chart):
         .configure_axis(
             labelColor=INK, titleColor=INK, gridColor=GRID, domainColor=GRID,
             tickColor=GRID, labelFont=FONT, titleFont=FONT,
-            labelFontSize=11, titleFontSize=12)
+            labelFontSize=13, titleFontSize=14)
         .configure_legend(
             labelColor=INK, titleColor=INK, labelFont=FONT, titleFont=FONT,
-            labelFontSize=11, titleFontSize=12, orient="top", title=None)
+            labelFontSize=13, titleFontSize=13, orient="top", title=None,
+            symbolSize=140)
         .configure_title(color=INK, font=FONT, fontSize=15, anchor="start")
     )
