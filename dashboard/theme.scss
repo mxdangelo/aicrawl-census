@@ -54,6 +54,16 @@ main section.level2 {
 h2 { margin: 0 0 0.7rem; padding: 0; border: 0; font-weight: 650; }
 .cell { margin: 2.4rem 0; }
 
+// ---- Tabsets (Chart | Table): quiet chrome ----------------------------
+// Quarto boxes the tab content (border + padding) and the .cell margin
+// stacks inside it — together they read as a large empty frame around the
+// chart. Keep the tab row's hairline, drop the box, tighten the inside.
+.panel-tabset {
+  .tab-content { border: 0; padding: 0; }
+  .cell { margin: 1.1rem 0 0; }
+  margin: 2.4rem 0;            // the tabset takes over the cell's rhythm
+}
+
 // ---- Scroll reveal: light fade+rise; JS gates on prefers-reduced-motion
 .reveal { opacity: 0; transform: translateY(14px);
   transition: opacity .6s ease, transform .6s ease; }
