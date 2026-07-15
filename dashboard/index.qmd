@@ -187,6 +187,17 @@ and the aggregated snapshot data are open:
 ```{=html}
 <script>
 (function () {
+  // Sticky dateline: a sentinel just above it tells us when it is pinned,
+  // so the hairline/background only appear once it actually docks.
+  var dl = document.querySelector('.dateline');
+  if (!dl || !('IntersectionObserver' in window)) return;
+  var sentinel = document.createElement('div');
+  dl.parentNode.insertBefore(sentinel, dl);
+  new IntersectionObserver(function (entries) {
+    dl.classList.toggle('is-stuck', !entries[0].isIntersecting);
+  }).observe(sentinel);
+})();
+(function () {
   var targets = document.querySelectorAll('main section.level2');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!('IntersectionObserver' in window) || reduce) return;   // graceful: stay visible

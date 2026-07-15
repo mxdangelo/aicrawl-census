@@ -37,11 +37,20 @@ header#title-block-header { display: none; }
   margin: 1.9rem 0 0.5rem;
   font-size: 1.05rem;
 }
+// Sticky: scrolls with the hero, then docks to the top edge and tags along —
+// the reader never loses the scope (sample, snapshot, Method link). The
+// hairline + background appear only while pinned (.is-stuck, set by JS).
 .dateline {
   color: #898781;
   font-size: 0.85rem;
   margin-top: 1.3rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: $body-bg;
+  padding: 0.55rem 0;
 }
+.dateline.is-stuck { border-bottom: 1px solid #e6e4dd; }
 
 // ---- Section breaks: uniform vertical rhythm -------------------------
 // Spacing lives on the section wrapper, not the h2 — otherwise the first
