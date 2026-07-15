@@ -42,6 +42,11 @@ snapshot_label = (f"snapshot {snapshot}" if n_snapshots == 1
 AI Crawler Observatory · Italy
 :::
 
+::: {.mission}
+The three signals Italian sites send AI — **block** crawlers, **offer** content,
+**reserve** rights.
+:::
+
 ::: {.lead}
 In Italy, resistance to AI crawlers is concentrated in one sector: the press.
 :::
@@ -62,11 +67,6 @@ charts.block_by_sector(df)
 as_table(charts.block_table(df))
 ```
 
-:::
-
-::: {.scope}
-The observatory tracks three signals Italian sites send AI — whether they
-**block** crawlers, **offer** content, or **reserve** their rights.
 :::
 
 ::: {.dateline}
