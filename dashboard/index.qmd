@@ -14,6 +14,7 @@ execute:
 ```{python}
 import json
 import pandas as pd
+from IPython.display import HTML
 import charts
 
 meta = json.load(open("data/meta.json", encoding="utf-8"))
@@ -23,6 +24,12 @@ n_snapshots = len(meta["snapshots"])
 # The parquet tables accumulate every snapshot; these sections read the latest.
 df = pd.read_parquet("data/policy_facts.parquet").query("snapshot_date == @snapshot")
 sig = pd.read_parquet("data/sector_signals.parquet").query("snapshot_date == @snapshot")
+res = pd.read_parquet("data/reserved_domains.parquet").query("snapshot_date == @snapshot")
+
+
+def as_table(t):
+    """Table view of a chart's data — same numbers, no hover needed."""
+    return HTML(t.to_html(index=False, classes="table table-sm", border=0))
 
 n_domains = int(sig["n_domains"].sum())
 n_sectors = len(meta["sectors"])
@@ -41,9 +48,21 @@ In Italy, resistance to AI crawlers is concentrated in one sector: the press.
 
 News blocks OpenAI's GPTBot at 31% and media at 21%; no other sector exceeds 10%. 9.0% overall.
 
+::: {.panel-tabset}
+
+### Chart
+
 ```{python}
 charts.block_by_sector(df)
 ```
+
+### Table
+
+```{python}
+as_table(charts.block_table(df))
+```
+
+:::
 
 ::: {.scope}
 The observatory tracks three signals Italian sites send AI — whether they
@@ -62,9 +81,24 @@ the 543 sites treat it: **blocked** at the root, **partial** (some paths off
 limits), or **allowed**. Use the menus to slice by sector, or by whether a rule
 *names the crawler* or comes from a catch-all `*`.
 
+::: {.panel-tabset}
+
+### Chart
+
 ```{python}
 charts.verdict_by_crawler(df, default_source="specific")
 ```
+
+### Table
+
+```{python}
+as_table(charts.verdict_table(df))
+```
+
+Rules that name the crawler — the chart's opening view; use the chart's menus
+for the other slices.
+
+:::
 
 ## Offer {#offer}
 
@@ -75,9 +109,21 @@ an unexpected sector — **banking**, where more than 1 in 4 sites publish one,
 and every one is hand-written, not shipped by a plugin. Ink marks a deliberate file;
 gray, a plugin default.
 
+::: {.panel-tabset}
+
+### Chart
+
 ```{python}
 charts.offer_by_sector(sig)
 ```
+
+### Table
+
+```{python}
+as_table(charts.offer_table(sig))
+```
+
+:::
 
 ## Reserve {#reserve}
 
@@ -88,9 +134,21 @@ the only one of the three signals with legal weight in the EU. Just **8 of 543
 sites** assert it, and they cluster in the industries that live on copyright:
 book publishers and universities (6), and the press (2). Every other sector: none.
 
+::: {.panel-tabset}
+
+### Chart
+
 ```{python}
-charts.reserve_dotgrid(sig)
+charts.reserve_dotgrid(sig, res)
 ```
+
+### Table
+
+```{python}
+as_table(charts.reserve_table(res))
+```
+
+:::
 
 ## Method {#method}
 
