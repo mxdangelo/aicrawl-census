@@ -11,21 +11,21 @@
     "href": "index.html#block",
     "title": "AI Crawler Observatory · Italy",
     "section": "Block",
-    "text": "Block\nSites keep AI crawlers out through robots.txt — a plain-text file that can name a crawler and disallow paths. Each bar is one crawler; the split shows how the 543 sites treat it: blocked at the root, partial (some paths off limits), or allowed. Use the menus to slice by sector, or by whether a rule names the crawler or comes from a catch-all *."
+    "text": "Block\nSites keep AI crawlers out through robots.txt — a plain-text file that can name a crawler and disallow paths. Each bar is one crawler; the split shows how the 543 sites treat it: blocked at the root, partial (some paths off limits), or allowed. Use the menus to slice by sector, or by whether a rule names the crawler or comes from a catch-all *.\n\nChartTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCrawler\nOperator\nBlocked\nPartial\nAllowed\n\n\n\n\nCCBot\nCommon Crawl\n61\n4\n1\n\n\nClaudeBot\nAnthropic\n51\n7\n4\n\n\nBytespider\nByteDance\n49\n2\n1\n\n\nGPTBot\nOpenAI\n49\n6\n4\n\n\nApplebot-Extended\nApple\n45\n5\n3\n\n\nGoogle-Extended\nGoogle\n42\n5\n6\n\n\nAmazonbot\nAmazon\n39\n4\n6\n\n\nanthropic-ai\nAnthropic\n38\n4\n1\n\n\nmeta-externalagent\nMeta\n37\n4\n1\n\n\ncohere-ai\nCohere\n36\n2\n0\n\n\nPerplexityBot\nPerplexity\n34\n7\n6\n\n\nDiffbot\nDiffbot\n29\n3\n0\n\n\nChatGPT-User\nOpenAI\n19\n7\n5\n\n\nFacebookBot\nMeta\n16\n3\n1\n\n\nOAI-SearchBot\nOpenAI\n12\n7\n8\n\n\nClaude-SearchBot\nAnthropic\n12\n4\n4\n\n\nClaude-User\nAnthropic\n10\n4\n3\n\n\nAI2Bot\nAllen Institute\n8\n2\n0\n\n\nPerplexity-User\nPerplexity\n8\n2\n2\n\n\nMistralAI-User\nMistral\n6\n1\n0\n\n\n\n\n\nRules that name the crawler — the chart’s opening view; use the chart’s menus for the other slices."
   },
   {
     "objectID": "index.html#offer",
     "href": "index.html#offer",
     "title": "AI Crawler Observatory · Italy",
     "section": "Offer",
-    "text": "Offer\nThe opposite move. llms.txt (a 2024 convention) is a Markdown file that offers a curated view of a site to language models — “here is what to read about us.” Almost nobody uses it: 46 of 543 sites, 8.5%. And the lead is an unexpected sector — banking, where more than 1 in 4 sites publish one, and every one is hand-written, not shipped by a plugin. Ink marks a deliberate file; gray, a plugin default."
+    "text": "Offer\nThe opposite move. llms.txt (a 2024 convention) is a Markdown file that offers a curated view of a site to language models — “here is what to read about us.” Almost nobody uses it: 46 of 543 sites, 8.5%. And the lead is an unexpected sector — banking, where more than 1 in 4 sites publish one, and every one is hand-written, not shipped by a plugin. Ink marks a deliberate file; gray, a plugin default.\n\nChartTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSector\nHand-written\nPlugin default\nTotal\nSites in sample\n\n\n\n\nBanking & insurance\n14\n0\n14\n49\n\n\nE-commerce\n6\n4\n10\n60\n\n\nHealth\n3\n3\n6\n39\n\n\nMedia & lifestyle\n2\n2\n4\n47\n\n\nNews\n3\n0\n3\n71\n\n\nPublishing & education\n2\n1\n3\n69\n\n\nTelecoms & utilities\n2\n0\n2\n44\n\n\nTravel & tourism\n2\n0\n2\n53\n\n\nReal estate\n1\n0\n1\n26\n\n\nPublic administration\n0\n1\n1\n85"
   },
   {
     "objectID": "index.html#reserve",
     "href": "index.html#reserve",
     "title": "AI Crawler Observatory · Italy",
     "section": "Reserve",
-    "text": "Reserve\nThe legal one. Under EU copyright law (Directive 2019/790, Article 4), AI companies may text-and-data-mine public content for training unless the owner reserves the right in a machine-readable form. TDMRep is that reservation — the only one of the three signals with legal weight in the EU. Just 8 of 543 sites assert it, and they cluster in the industries that live on copyright: book publishers and universities (6), and the press (2). Every other sector: none."
+    "text": "Reserve\nThe legal one. Under EU copyright law (Directive 2019/790, Article 4), AI companies may text-and-data-mine public content for training unless the owner reserves the right in a machine-readable form. TDMRep is that reservation — the only one of the three signals with legal weight in the EU. Just 8 of 543 sites assert it, and they cluster in the industries that live on copyright: book publishers and universities (6), and the press (2). Every other sector: none.\n\nChartTable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSite\nWho\nSignals via\n\n\n\n\nbollatiboringhieri.it\nPublishers & universities\nHTTP header\n\n\ngarzanti.it\nPublishers & universities\nHTTP header\n\n\nlonganesi.it\nPublishers & universities\nHTTP header\n\n\nmondadori.it\nPublishers & universities\n.well-known file, meta tag\n\n\nsalani.it\nPublishers & universities\nHTTP header\n\n\nzanichelli.it\nPublishers & universities\n.well-known file\n\n\ncorriere.it\nNews\nmeta tag\n\n\ngazzetta.it\nNews\nmeta tag"
   },
   {
     "objectID": "index.html#method",
