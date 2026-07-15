@@ -54,7 +54,22 @@ FROM src.dw_dim_domain
 GROUP BY ALL
 """
 
-TABLES = {"policy_facts": POLICY_FACTS, "sector_signals": SECTOR_SIGNALS}
+# The sites asserting the TDMRep reservation, by name — the Reserve section
+# names them (dotgrid tooltip + table view). Tiny by construction (8 in IT).
+RESERVED_DOMAINS = """
+SELECT
+    ? AS snapshot_date, ? AS country, d.domain, d.sector,
+    concat_ws(', ',
+        CASE WHEN t.valid = 1 THEN '.well-known file' END,
+        CASE WHEN t.via_header = 1 THEN 'HTTP header' END,
+        CASE WHEN t.via_meta = 1 THEN 'meta tag' END) AS channels
+FROM src.dw_dim_domain d
+JOIN src.tdmrep_meta t USING (domain)
+WHERE d.tdmrep_present = 1
+"""
+
+TABLES = {"policy_facts": POLICY_FACTS, "sector_signals": SECTOR_SIGNALS,
+          "reserved_domains": RESERVED_DOMAINS}
 
 
 def _upsert(con, name, sql, snapshot_date, country):

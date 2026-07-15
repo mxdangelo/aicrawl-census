@@ -78,10 +78,9 @@ def verdict_by_crawler(df, default_source="All"):
     return theme.themed(chart)
 
 
-def block_by_sector(df, crawler="GPTBot", emphasize="news"):
-    """Hero finding: share of each sector that *specifically* blocks the given
-    crawler. Emphasis form — the story sector in the accent ink, the rest gray;
-    no gridlines, no x-axis (every bar is directly labeled with its %)."""
+def _block_agg(df, crawler):
+    """Per-sector share of sites that *specifically* block the given crawler.
+    Shared by the hero chart and its table view."""
     g = df[df["crawler"] == crawler].copy()
     g["blk"] = (((g["verdict"] == "blocked") & (g["source"] == "specific"))
                 * g["n_domains"])
@@ -89,6 +88,15 @@ def block_by_sector(df, crawler="GPTBot", emphasize="news"):
         blk=("blk", "sum"), tot=("n_domains", "sum"))
     agg["pct"] = 100 * agg["blk"] / agg["tot"]
     agg["sector_label"] = agg["sector"].map(SECTOR_LABELS).fillna(agg["sector"])
+    return agg
+
+
+def block_by_sector(df, crawler="GPTBot", emphasize="news"):
+    """Hero finding: share of each sector that *specifically* blocks the given
+    crawler. Emphasis form — the story sector in the accent ink, the rest gray;
+    no gridlines, no x-axis (every bar is directly labeled with its %). The
+    tooltip carries the counts behind the percentage."""
+    agg = _block_agg(df, crawler)
     agg["pct_label"] = agg["pct"].round().astype(int).astype(str) + "%"
 
     base = alt.Chart(agg).encode(
@@ -98,7 +106,11 @@ def block_by_sector(df, crawler="GPTBot", emphasize="news"):
                 scale=alt.Scale(domain=[0, agg["pct"].max() * 1.12])))
     bars = base.mark_bar(cornerRadiusEnd=4, height=20).encode(
         color=alt.condition(f"datum.sector === '{emphasize}'",
-                            alt.value(theme.ACCENT), alt.value(theme.BAR_GRAY)))
+                            alt.value(theme.ACCENT), alt.value(theme.BAR_GRAY)),
+        tooltip=[alt.Tooltip("sector_label:N", title="sector"),
+                 alt.Tooltip("blk:Q", title=f"blocks {crawler} by name"),
+                 alt.Tooltip("tot:Q", title="sites in sample"),
+                 alt.Tooltip("pct:Q", title="share (%)", format=".1f")])
     labels = base.mark_text(align="left", dx=6, color=theme.INK,
                             fontSize=13).encode(text=alt.Text("pct_label:N"))
     return theme.themed((bars + labels).properties(width="container", height=360))
@@ -141,39 +153,101 @@ def offer_by_sector(sig):
     return theme.themed((bars + labels).properties(width="container", height=340))
 
 
-def reserve_dotgrid(sig):
+# Reserve views group the reserving sectors into two reader-facing categories.
+RESERVE_CATEGORY = {
+    "publishing_education": "Publishers & universities",
+    "news": "News",
+}
+RESERVE_COLORS = [theme.ACCENT, "#7a776f"]
+
+
+def reserve_dotgrid(sig, reserved):
     """Reserve finding as a unit chart: one square per site (543), the handful
     that assert the TDMRep legal reservation lit — book publishers/universities
     in ink, news in a mid tone. The rarity reads as an image, not a near-empty
-    bar chart."""
-    counts = dict(zip(sig["sector"], sig["tdmrep_present"].astype(int)))
-    n_pub = counts.get("publishing_education", 0)
-    n_news = counts.get("news", 0)
+    bar chart. Each lit square is a real site, named on hover with the channel
+    it signals through."""
     total = int(sig["n_domains"].sum())
-    reserved = n_pub + n_news
 
     cols = 31
-    d = pd.DataFrame({"i": range(total)})
-    d["x"] = d["i"] % cols
-    d["y"] = d["i"] // cols
-    # spread the lit squares across the field (deterministic, not a corner block)
-    step = total // reserved
-    positions = [k * step + step // 2 for k in range(reserved)]
-    cat = {p: ("Publishers & universities" if k < n_pub else "News")
-           for k, p in enumerate(positions)}
-    d["category"] = d["i"].map(cat).fillna("—")
+    field = pd.DataFrame({"i": range(total)})
+    field["x"] = field["i"] % cols
+    field["y"] = field["i"] // cols
 
-    return theme.themed(
-        alt.Chart(d).mark_square(size=100, cornerRadius=2).encode(
-            x=alt.X("x:O", axis=None),
-            y=alt.Y("y:O", axis=None, scale=alt.Scale(reverse=True)),
-            color=alt.Color(
-                "category:N",
-                scale=alt.Scale(
-                    domain=["Publishers & universities", "News", "—"],
-                    range=[theme.ACCENT, "#7a776f", "#efeee8"]),
-                legend=alt.Legend(
-                    title=None, labelLimit=320,
-                    values=["Publishers & universities", "News"])),
-            tooltip=alt.value(None),
-        ).properties(width=620, height=360))
+    # spread the lit squares across the field (deterministic, not a corner block)
+    lit = reserved.copy()
+    lit["category"] = lit["sector"].map(RESERVE_CATEGORY).fillna("Other")
+    lit = lit.sort_values(["category", "domain"],
+                          ascending=[False, True]).reset_index(drop=True)
+    step = total // len(lit)
+    positions = [k * step + step // 2 for k in range(len(lit))]
+    lit["x"] = [p % cols for p in positions]
+    lit["y"] = [p // cols for p in positions]
+
+    square = dict(size=100, cornerRadius=2)
+    xy = dict(x=alt.X("x:O", axis=None),
+              y=alt.Y("y:O", axis=None, scale=alt.Scale(reverse=True)))
+    base = alt.Chart(field).mark_square(color="#efeee8", **square).encode(
+        tooltip=alt.value(None), **xy)
+    sites = alt.Chart(lit).mark_square(**square).encode(
+        color=alt.Color(
+            "category:N",
+            scale=alt.Scale(domain=list(RESERVE_CATEGORY.values()),
+                            range=RESERVE_COLORS),
+            legend=alt.Legend(title=None, labelLimit=320)),
+        tooltip=[alt.Tooltip("domain:N", title="site"),
+                 alt.Tooltip("category:N", title="who"),
+                 alt.Tooltip("channels:N", title="signals via")],
+        **xy)
+    return theme.themed((base + sites).properties(width=620, height=360))
+
+
+# --- Table views -----------------------------------------------------------
+# One table per chart, same data, reachable without hovering (accessibility).
+
+
+def block_table(df, crawler="GPTBot"):
+    agg = _block_agg(df, crawler).sort_values("pct", ascending=False)
+    return pd.DataFrame({
+        "Sector": agg["sector_label"],
+        f"Blocks {crawler} by name": agg["blk"].astype(int),
+        "Sites": agg["tot"].astype(int),
+        "Share": agg["pct"].map("{:.1f}%".format),
+    })
+
+
+def verdict_table(df, source="specific"):
+    """Verdict counts per crawler on one rule slice — by default 'specific',
+    the rules that name the crawler (the chart's opening view)."""
+    g = df if source == "All" else df[df["source"] == source]
+    t = (g.pivot_table(index=["crawler", "operator"], columns="verdict",
+                       values="n_domains", aggfunc="sum", fill_value=0)
+         .reindex(columns=["blocked", "partial", "allowed"], fill_value=0)
+         .reset_index()
+         .sort_values("blocked", ascending=False))
+    t.columns = ["Crawler", "Operator", "Blocked", "Partial", "Allowed"]
+    return t
+
+
+def offer_table(sig):
+    t = sig.copy()
+    t["total"] = t["llms_hand"] + t["llms_generated"]
+    t = t.sort_values(["total", "llms_hand"], ascending=False)
+    return pd.DataFrame({
+        "Sector": t["sector"].map(SECTOR_LABELS).fillna(t["sector"]),
+        "Hand-written": t["llms_hand"].astype(int),
+        "Plugin default": t["llms_generated"].astype(int),
+        "Total": t["total"].astype(int),
+        "Sites in sample": t["n_domains"].astype(int),
+    })
+
+
+def reserve_table(reserved):
+    r = reserved.copy()
+    r["category"] = r["sector"].map(RESERVE_CATEGORY).fillna("Other")
+    r = r.sort_values(["category", "domain"], ascending=[False, True])
+    return pd.DataFrame({
+        "Site": r["domain"],
+        "Who": r["category"],
+        "Signals via": r["channels"],
+    })
