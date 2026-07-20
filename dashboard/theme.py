@@ -6,6 +6,7 @@ Charts render on a transparent background so the page (Quarto light/dark) shows
 through; ink/grid use mid-tones that stay legible on both.
 """
 ACCENT = "#1a1a19"      # observatory signature (ink); used sparingly, for emphasis
+PAPER = "#f9f9f7"       # page plane; also text laid on top of an ink-dark bar
 BAR_GRAY = "#cbc9c2"    # de-emphasised bars in an emphasis chart
 GRAY = "#b5b3ab"
 INK = "#52514e"         # secondary text ink (labels, values)

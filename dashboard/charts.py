@@ -2,6 +2,8 @@
 bound dropdowns filter client-side (slice-and-dice) with no hand-written JS.
 Each builder takes the tidy policy_facts DataFrame and returns a themed chart.
 """
+import base64
+
 import altair as alt
 import pandas as pd
 
@@ -34,11 +36,14 @@ def _crawler_order(df):
 
 
 def verdict_by_crawler(df, default_source="All"):
-    """Normalized verdict mix per crawler, sliceable by sector and source.
+    """Verdict mix per crawler, sliceable by sector and source.
 
-    Every domain has exactly one verdict per crawler, so the 100%-stacked bars
-    read as 'share of domains' directly. Two dropdowns filter the underlying
-    rows before aggregation — the bars re-normalize live."""
+    Every domain has exactly one verdict per crawler, so each bar is a whole:
+    the segments are shares of the sites in the current slice. The share is
+    printed inside each segment (segments under 7% stay bare — no room), so
+    the x-axis goes away entirely and nothing reads as a raw count. Counts
+    live in the tooltip. Two dropdowns filter the rows before aggregation —
+    the bars re-normalize live."""
     sectors = sorted(df["sector"].unique())
     sector_p = alt.param(
         name="sector", value="All",
@@ -53,28 +58,52 @@ def verdict_by_crawler(df, default_source="All"):
             labels=["Any rule", "Names the crawler", "Catch-all (*)", "No robots.txt"],
             name="Rule  "))
 
-    chart = (
+    # Aggregate inside the spec (after the dropdowns filter) so the printed
+    # share re-computes on every slice, exactly like the bar widths.
+    base = (
         alt.Chart(df)
-        .mark_bar()
-        .encode(
-            y=alt.Y("crawler:N", sort=_crawler_order(df), title=None,
-                    axis=alt.Axis(domain=False, ticks=False)),
-            x=alt.X("sum(n_domains):Q", stack="normalize",
-                    title="share of domains", axis=alt.Axis(format="%")),
-            color=alt.Color(
-                "verdict:N",
-                scale=alt.Scale(domain=theme.VERDICT_DOMAIN,
-                                range=theme.VERDICT_RANGE),
-                legend=alt.Legend(title="verdict")),
-            tooltip=[alt.Tooltip("crawler:N"), alt.Tooltip("operator:N"),
-                     alt.Tooltip("verdict:N"),
-                     alt.Tooltip("sum(n_domains):Q", title="domains")],
-        )
-        .add_params(sector_p, source_p)
         .transform_filter("sector == 'All' || datum.sector == sector")
         .transform_filter("source == 'All' || datum.source == source")
-        .properties(width="container", height=520)
+        .transform_aggregate(n="sum(n_domains)",
+                             groupby=["crawler", "operator", "verdict"])
+        .transform_joinaggregate(tot="sum(n)", groupby=["crawler"])
+        .transform_calculate(
+            pct="datum.n / datum.tot",
+            ord=f"indexof({theme.VERDICT_DOMAIN}, datum.verdict)",
+            label="datum.n / datum.tot >= 0.07"
+                  " ? format(datum.n / datum.tot, '.0%') : ''")
     )
+
+    y = alt.Y("crawler:N", sort=_crawler_order(df), title=None,
+              axis=alt.Axis(domain=False, ticks=False))
+    x_kw = dict(stack="zero", axis=None, title=None,
+                scale=alt.Scale(domain=[0, 1]))
+    x = alt.X("pct:Q", **x_kw)
+    x_mid = alt.X("pct:Q", bandPosition=0.5, **x_kw)   # centre text in segment
+    order = alt.Order("ord:Q")
+
+    bars = base.mark_bar().encode(
+        y=y, x=x, order=order,
+        color=alt.Color(
+            "verdict:N",
+            scale=alt.Scale(domain=theme.VERDICT_DOMAIN,
+                            range=theme.VERDICT_RANGE),
+            legend=alt.Legend(title=None)),
+        tooltip=[alt.Tooltip("crawler:N"), alt.Tooltip("operator:N"),
+                 alt.Tooltip("verdict:N"),
+                 alt.Tooltip("n:Q", title="domains"),
+                 alt.Tooltip("pct:Q", title="share", format=".1%")])
+    # Labels sit inside their segment; on the ink-dark "blocked" block they
+    # have to invert to stay legible.
+    labels = base.mark_text(fontSize=12, baseline="middle").encode(
+        y=y, x=x_mid, order=order,
+        text=alt.Text("label:N"),
+        color=alt.condition("datum.verdict === 'blocked'",
+                            alt.value(theme.PAPER), alt.value(theme.ACCENT)))
+
+    chart = ((bars + labels)
+             .add_params(sector_p, source_p)
+             .properties(width="container", height=520))
     return theme.themed(chart)
 
 
@@ -117,40 +146,84 @@ def block_by_sector(df, crawler="GPTBot", emphasize="news"):
 
 
 def offer_by_sector(sig):
-    """Offer finding: how many sites in each sector publish an llms.txt, split
-    by whether it was hand-written (a decision) or plugin-generated (inherited).
-    Absolute counts — the scarcity is the point. Horizontal, sorted by total."""
+    """Offer finding: among the sites that publish an llms.txt at all, how many
+    wrote it by hand (a decision) versus inherited it from a plugin.
+
+    Grouped, not stacked: this section asks how much adoption was a decision, so
+    the two quantities are the finding and the sector total is the confusing
+    third number. Grouping shows the two and drops the total. Each bar carries
+    its count just past its end, so every value stays legible down to 1.
+
+    Positions are computed, not left to a band+offset scale: an offset scale
+    always reserves a slot for the missing origin, so a sector with one bar
+    lands off-center in its lane. Here each lane is one unit tall; a lone bar
+    sits on the lane center, a pair straddles it by ±OFF. Dividers are explicit
+    rules between lanes only — none above the first lane or below the last."""
+    OFF = 0.2                       # half-gap between the two bars of a sector
     d = sig.melt(id_vars=["sector"], value_vars=["llms_hand", "llms_generated"],
                  var_name="origin", value_name="n")
     d["origin"] = d["origin"].map(
         {"llms_hand": "hand-written", "llms_generated": "plugin default"})
-    d["ord"] = d["origin"].map({"hand-written": 0, "plugin default": 1})
     d["sector_label"] = d["sector"].map(SECTOR_LABELS).fillna(d["sector"])
 
     tot = d.groupby("sector_label", as_index=False)["n"].sum()
     order = tot.sort_values("n", ascending=False)["sector_label"].tolist()
-    xmax = tot["n"].max() * 1.14
-    y = alt.Y("sector_label:N", sort=order, title=None,
-              axis=alt.Axis(domain=False, ticks=False))
+    lane = {name: i for i, name in enumerate(order)}     # 0 = top lane
+    n_lanes = len(order)
 
-    bars = alt.Chart(d).mark_bar(cornerRadiusEnd=4, height=20).encode(
-        y=y,
-        x=alt.X("sum(n):Q", stack=True, axis=None,
-                scale=alt.Scale(domain=[0, xmax])),
-        color=alt.Color(
-            "origin:N",
-            scale=alt.Scale(domain=["hand-written", "plugin default"],
-                            range=[theme.ACCENT, theme.BAR_GRAY]),
-            legend=alt.Legend(title=None)),
-        order=alt.Order("ord:Q"),
-        tooltip=["sector_label:N", "origin:N",
-                 alt.Tooltip("sum(n):Q", title="files")])
-    labels = alt.Chart(tot).mark_text(align="left", dx=6, color=theme.INK,
-                                      fontSize=13).encode(
-        y=alt.Y("sector_label:N", sort=order),
-        x=alt.X("n:Q", scale=alt.Scale(domain=[0, xmax])),
-        text=alt.Text("n:Q"))
-    return theme.themed((bars + labels).properties(width="container", height=340))
+    THICK = 0.14                    # bar thickness, in lane units
+    bar = d[d["n"] > 0].copy()
+    bar["lane"] = bar["sector_label"].map(lane)
+    # How many bars this sector actually has — one bar centers, two straddle.
+    pair = bar.groupby("lane")["origin"].transform("size").eq(2)
+    sign = bar["origin"].map({"hand-written": -1, "plugin default": 1})
+    bar["yc"] = bar["lane"] + sign * OFF * pair          # lone bar: +0 → centered
+    # Thickness is an explicit vertical span (y..y2) so the bar is horizontal —
+    # x alone is the length. A continuous y with no span makes a vertical bar.
+    bar["y0"] = bar["yc"] - THICK / 2
+    bar["y1"] = bar["yc"] + THICK / 2
+    bar["x0"] = 0                   # y2 ranges the bar, so x needs a span too
+
+    origin_domain = ["hand-written", "plugin default"]
+    y_scale = alt.Scale(domain=[n_lanes - 0.5, -0.5])   # lane 0 at top
+    x_scale = alt.Scale(domain=[0, d["n"].max() * 1.12])   # headroom for labels
+    x = alt.X("x0:Q", axis=None, title=None, scale=x_scale)
+    color = alt.Color(
+        "origin:N",
+        scale=alt.Scale(domain=origin_domain, range=[theme.ACCENT, theme.BAR_GRAY]),
+        legend=alt.Legend(title=None))
+
+    # Divider rules sit between lanes: at 0.5, 1.5, … n-1.5 — never at an edge.
+    rules = pd.DataFrame({"y": [i + 0.5 for i in range(n_lanes - 1)]})
+    dividers = alt.Chart(rules).mark_rule(
+        color=theme.GRID, strokeWidth=1).encode(
+        y=alt.Y("y:Q", scale=y_scale, axis=None))
+
+    bars = alt.Chart(bar).mark_bar(cornerRadiusEnd=2).encode(
+        y=alt.Y("y0:Q", scale=y_scale, axis=None),
+        y2="y1:Q", x=x, x2="n:Q", color=color,
+        tooltip=["sector_label:N", "origin:N", alt.Tooltip("n:Q", title="files")])
+    counts = alt.Chart(bar).mark_text(
+        align="left", dx=4, fontSize=11, color=theme.INK, baseline="middle").encode(
+        y=alt.Y("yc:Q", scale=y_scale, axis=None),
+        x=alt.X("n:Q", scale=x_scale, axis=None), text=alt.Text("n:Q"))
+    # Fixed width: "container" is not honoured inside an hconcat, and the page
+    # already carries a fixed-width chart (reserve). Names + plot fit the column.
+    plot = (dividers + bars + counts).properties(width=520, height=430)
+
+    # Sector names as their own left column, sharing the lane scale so rows line
+    # up. A dedicated text panel sidesteps the layered-axis label-space problems
+    # of the manual y layout — the panel reserves its own width cleanly.
+    names = pd.DataFrame({"i": range(n_lanes), "name": order})
+    name_col = alt.Chart(names).mark_text(
+        align="right", baseline="middle", fontSize=13, color=theme.INK).encode(
+        y=alt.Y("i:Q", scale=y_scale, axis=None),
+        x=alt.X("x:Q", axis=None, scale=alt.Scale(domain=[0, 1])),
+        text="name:N").transform_calculate(x="1").properties(width=150, height=430)
+
+    return theme.themed(
+        alt.hconcat(name_col, plot, spacing=10)
+        .configure_concat(spacing=10))
 
 
 # Reserve views group the reserving sectors into two reader-facing categories.
@@ -158,52 +231,78 @@ RESERVE_CATEGORY = {
     "publishing_education": "Publishers & universities",
     "news": "News",
 }
-RESERVE_COLORS = [theme.ACCENT, "#7a776f"]
 
 
-def reserve_dotgrid(sig, reserved):
-    """Reserve finding as a unit chart: one square per site (543), the handful
-    that assert the TDMRep legal reservation lit — book publishers/universities
-    in ink, news in a mid tone. The rarity reads as an image, not a near-empty
-    bar chart. Each lit square is a real site, named on hover with the channel
-    it signals through."""
+def signal_cards(df, sig, reserved, crawler="GPTBot"):
+    """The three signals as the page's routing layer: one card each, carrying
+    the headline figure and linking to its section. This is the 'overview'
+    step — the whole observatory in three numbers, before any chart.
+
+    Reserve reads as a count, not a share, on purpose: eight sites is a
+    countable handful and rounding it to 1.5% buries the finding.
+
+    All figures come from the data — the page's prose does not."""
     total = int(sig["n_domains"].sum())
+    agg = _block_agg(df, crawler)
+    blocked = 100 * agg["blk"].sum() / agg["tot"].sum()
+    offer = 100 * (sig["llms_hand"].sum() + sig["llms_generated"].sum()) / total
 
-    cols = 31
-    field = pd.DataFrame({"i": range(total)})
-    field["x"] = field["i"] % cols
-    field["y"] = field["i"] // cols
+    cards = [
+        ("block", f"{blocked:.1f}%", f"block {crawler} by name",
+         "robots.txt rules that shut a named AI crawler out."),
+        ("offer", f"{offer:.1f}%", "publish an llms.txt",
+         "A file that offers models a curated view of the site."),
+        ("reserve", f"{len(reserved)}", f"of {total} reserve rights",
+         "TDMRep — the only signal with legal weight in the EU."),
+    ]
+    items = "".join(
+        f'<a class="signal-card" href="#{anchor}">'
+        f'<span class="signal-figure">{figure}</span>'
+        f'<span class="signal-what">{what}</span>'
+        f'<span class="signal-note">{note}</span></a>'
+        for anchor, figure, what, note in cards)
+    return f'<nav class="signal-cards" aria-label="The three signals">{items}</nav>'
 
-    # spread the lit squares across the field (deterministic, not a corner block)
-    lit = reserved.copy()
-    lit["category"] = lit["sector"].map(RESERVE_CATEGORY).fillna("Other")
-    lit = lit.sort_values(["category", "domain"],
-                          ascending=[False, True]).reset_index(drop=True)
-    step = total // len(lit)
-    positions = [k * step + step // 2 for k in range(len(lit))]
-    lit["x"] = [p % cols for p in positions]
-    lit["y"] = [p // cols for p in positions]
 
-    square = dict(size=100, cornerRadius=2)
-    xy = dict(x=alt.X("x:O", axis=None),
-              y=alt.Y("y:O", axis=None, scale=alt.Scale(reverse=True)))
-    base = alt.Chart(field).mark_square(color="#efeee8", **square).encode(
-        tooltip=alt.value(None), **xy)
-    sites = alt.Chart(lit).mark_square(**square).encode(
-        color=alt.Color(
-            "category:N",
-            scale=alt.Scale(domain=list(RESERVE_CATEGORY.values()),
-                            range=RESERVE_COLORS),
-            legend=alt.Legend(title=None, labelLimit=320)),
-        tooltip=[alt.Tooltip("domain:N", title="site"),
-                 alt.Tooltip("category:N", title="who"),
-                 alt.Tooltip("channels:N", title="signals via")],
-        **xy)
-    return theme.themed((base + sites).properties(width=620, height=360))
+def reserve_stat(sig, reserved):
+    """Reserve finding as a single number, not a chart: eight sites out of the
+    sample is too little to plot — any chart of it is a near-empty field the
+    reader has to decode. The figure states it, the table below names the
+    sites. Computed from the data so it can't go stale."""
+    total = int(sig["n_domains"].sum())
+    n = len(reserved)
+    by_cat = (reserved["sector"].map(RESERVE_CATEGORY).fillna("Other")
+              .value_counts())
+    breakdown = " · ".join(f"{cat} {int(c)}" for cat, c in by_cat.items())
+    return (
+        '<div class="statblock">'
+        f'<p class="stat-figure"><span class="stat-number">{n}</span>'
+        f'<span class="stat-unit">of {total} sites</span></p>'
+        f'<p class="stat-note">{breakdown} · every other sector 0</p>'
+        '</div>'
+    )
 
 
 # --- Table views -----------------------------------------------------------
 # One table per chart, same data, reachable without hovering (accessibility).
+
+
+def table_html(t, filename):
+    """A table view plus its own download. The CSV is embedded as a data URI —
+    the page stays a single self-contained file, so the download works from
+    `file://`, from GitHub Pages, and offline, with no endpoint to maintain.
+
+    The numbers come from the same builders the charts use, so what is
+    downloaded is exactly what is on screen."""
+    csv = t.to_csv(index=False)
+    href = ("data:text/csv;charset=utf-8;base64,"
+            + base64.b64encode(csv.encode("utf-8")).decode("ascii"))
+    return (
+        f'<div class="table-actions">'
+        f'<a class="download-csv" href="{href}" download="{filename}">'
+        f'Download CSV</a></div>'
+        + t.to_html(index=False, classes="table table-sm", border=0)
+    )
 
 
 def block_table(df, crawler="GPTBot"):
