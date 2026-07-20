@@ -1,0 +1,48 @@
+name: Publish dashboard
+
+# The site is served from the gh-pages branch. Before this workflow existed,
+# gh-pages only moved when someone ran `quarto publish gh-pages` by hand, so a
+# merge to main could leave the live site weeks behind. Now merge means deploy.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dashboard/**'
+      - '.github/workflows/publish.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: publish-dashboard
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.9.38
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: dashboard/requirements.txt
+
+      - name: Install render dependencies
+        run: pip install -r dashboard/requirements.txt
+
+      # Renders dashboard/ and pushes _site/ to gh-pages. The render reads the
+      # parquet committed under dashboard/data/, never census.db, so no crawl
+      # artifacts are needed here.
+      - uses: quarto-dev/quarto-actions/publish@v2
+        with:
+          target: gh-pages
+          path: dashboard
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

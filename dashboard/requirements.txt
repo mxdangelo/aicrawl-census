@@ -1,0 +1,7 @@
+# Dependencies to render the Quarto dashboard (dashboard/index.qmd).
+# The crawler's own deps live in the root requirements.txt; the render needs
+# neither, because it reads the committed parquet in dashboard/data/.
+altair>=6.1
+pandas>=3.0
+pyarrow>=24.0
+ipykernel>=7.3
