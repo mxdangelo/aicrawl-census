@@ -27,9 +27,10 @@ sig = pd.read_parquet("data/sector_signals.parquet").query("snapshot_date == @sn
 res = pd.read_parquet("data/reserved_domains.parquet").query("snapshot_date == @snapshot")
 
 
-def as_table(t):
-    """Table view of a chart's data — same numbers, no hover needed."""
-    return HTML(t.to_html(index=False, classes="table table-sm", border=0))
+def as_table(t, filename):
+    """Table view of a chart's data — same numbers, no hover needed, and
+    downloadable as CSV."""
+    return HTML(charts.table_html(t, filename))
 
 n_domains = int(sig["n_domains"].sum())
 n_sectors = len(meta["sectors"])
@@ -42,16 +43,29 @@ snapshot_label = (f"snapshot {snapshot}" if n_snapshots == 1
 AI Crawler Observatory · Italy
 :::
 
-::: {.mission}
-The three signals Italian sites send AI — **block** crawlers, **offer** content,
-**reserve** rights.
+::: {.proposition}
+A recurring census of what Italian websites tell AI crawlers.
 :::
 
 ::: {.lead}
 In Italy, resistance to AI crawlers is concentrated in one sector: the press.
 :::
 
-News blocks OpenAI's GPTBot at 31% and media at 21%; no other sector exceeds 10%. 9.0% overall.
+News blocks OpenAI's GPTBot at 31% and media at 21%; no other sector exceeds 10%.
+
+```{python}
+HTML(charts.signal_cards(df, sig, res))
+```
+
+::: {.dateline}
+`{python} n_domains` domains · `{python} n_sectors` sectors · `{python} n_crawlers` crawlers · `{python} snapshot_label` · [Method →](#method)
+:::
+
+## Block {#block}
+
+Sites keep AI crawlers out through **robots.txt** — a plain-text file that can
+name a crawler and disallow paths. Where that happens is uneven: below, the
+share of each sector's sites that block GPTBot *by name*.
 
 ::: {.panel-tabset}
 
@@ -64,22 +78,17 @@ charts.block_by_sector(df)
 ### Table
 
 ```{python}
-as_table(charts.block_table(df))
+as_table(charts.block_table(df), "block-by-sector.csv")
 ```
 
 :::
 
-::: {.dateline}
-`{python} n_domains` domains · `{python} n_sectors` sectors · `{python} n_crawlers` crawlers · `{python} snapshot_label` · [Method →](#method)
-:::
-
-## Block {#block}
-
-Sites keep AI crawlers out through **robots.txt** — a plain-text file that can
-name a crawler and disallow paths. Each bar is one crawler; the split shows how
-the 543 sites treat it: **blocked** at the root, **partial** (some paths off
-limits), or **allowed**. Use the menus to slice by sector, or by whether a rule
-*names the crawler* or comes from a catch-all `*`.
+Crawler by crawler, the picture is the same one seen from the other side. Each
+bar is one crawler and splits into how the 543 sites treat it: **blocked** at
+the root, **partial** (some paths off limits), or **allowed**. Every bar is a
+whole, so the figures inside it are shares of sites, not counts — the counts are
+in the tooltip and the table. Use the menus to slice by sector, or by whether a
+rule *names the crawler* or comes from a catch-all `*`.
 
 ::: {.panel-tabset}
 
@@ -92,7 +101,7 @@ charts.verdict_by_crawler(df, default_source="specific")
 ### Table
 
 ```{python}
-as_table(charts.verdict_table(df))
+as_table(charts.verdict_table(df), "verdicts-by-crawler.csv")
 ```
 
 Rules that name the crawler — the chart's opening view; use the chart's menus
@@ -106,8 +115,13 @@ The opposite move. **llms.txt** (a 2024 convention) is a Markdown file that
 *offers* a curated view of a site to language models — "here is what to read
 about us." Almost nobody uses it: **46 of 543 sites, 8.5%**. And the lead is
 an unexpected sector — **banking**, where more than 1 in 4 sites publish one,
-and every one is hand-written, not shipped by a plugin. Ink marks a deliberate file;
-gray, a plugin default.
+and every one is hand-written, not shipped by a plugin.
+
+The chart below counts only those 46 publishers — not the whole sample — and
+splits each sector's bar by where the file came from: ink for a hand-written
+file, gray for a plugin default. That split is the question this section asks:
+how much of the adoption was a decision rather than a side effect. Sector
+sample sizes are in the table.
 
 ::: {.panel-tabset}
 
@@ -120,7 +134,7 @@ charts.offer_by_sector(sig)
 ### Table
 
 ```{python}
-as_table(charts.offer_table(sig))
+as_table(charts.offer_table(sig), "llmstxt-by-sector.csv")
 ```
 
 :::
@@ -130,25 +144,18 @@ as_table(charts.offer_table(sig))
 The legal one. Under EU copyright law (Directive 2019/790, Article 4), AI
 companies may text-and-data-mine public content for training **unless the owner
 reserves the right in a machine-readable form**. **TDMRep** is that reservation —
-the only one of the three signals with legal weight in the EU. Just **8 of 543
-sites** assert it, and they cluster in the industries that live on copyright:
-book publishers and universities (6), and the press (2). Every other sector: none.
-
-::: {.panel-tabset}
-
-### Chart
+the only one of the three signals with legal weight in the EU. Almost nobody
+uses it, and those who do live on copyright.
 
 ```{python}
-charts.reserve_dotgrid(sig, res)
+HTML(charts.reserve_stat(sig, res))
 ```
 
-### Table
+Every site that reserves, and the channel it signals through:
 
 ```{python}
-as_table(charts.reserve_table(res))
+as_table(charts.reserve_table(res), "tdmrep-sites.csv")
 ```
-
-:::
 
 ## Method {#method}
 
