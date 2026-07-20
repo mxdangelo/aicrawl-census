@@ -4,4 +4,12 @@
 altair>=6.1
 pandas>=3.0
 pyarrow>=24.0
+
+# Quarto's kernel shim (share/jupyter/notebook.py) imports these from the same
+# interpreter it launches. Locally they arrive transitively; a clean runner
+# pulls in none of them, and the render dies on `No module named 'yaml'`.
 ipykernel>=7.3
+jupyter-client>=8.9
+nbclient>=0.11
+nbformat>=5.10
+pyyaml>=6.0
