@@ -51,7 +51,8 @@ A recurring census of what Italian websites tell AI crawlers.
 In Italy, resistance to AI crawlers is concentrated in one sector: the press.
 :::
 
-News blocks OpenAI's GPTBot at 31% and media at 21%; no other sector exceeds 10%.
+News blocks OpenAI's GPTBot at 30% and media at 23%. The next sector is real
+estate at 15% — four sites out of twenty-six, two sharing one robots.txt template.
 
 ```{python}
 HTML(charts.signal_cards(df, sig, res))
@@ -113,11 +114,11 @@ for the other slices.
 
 The opposite move. **llms.txt** (a 2024 convention) is a Markdown file that
 *offers* a curated view of a site to language models — "here is what to read
-about us." Almost nobody uses it: **46 of 543 sites, 8.5%**. And the lead is
-an unexpected sector — **banking**, where more than 1 in 4 sites publish one,
+about us." Almost nobody uses it: **54 of 543 sites, 9.9%**. And the lead is
+an unexpected sector — **banking**, where more than 1 in 3 sites publish one,
 and every one is hand-written, not shipped by a plugin.
 
-The chart below counts only those 46 publishers — not the whole sample — and
+The chart below counts only those 54 publishers — not the whole sample — and
 splits each sector's bar by where the file came from: ink for a hand-written
 file, gray for a plugin default. That split is the question this section asks:
 how much of the adoption was a decision rather than a side effect. Sector
