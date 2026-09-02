@@ -150,6 +150,18 @@ h2 { margin: 0 0 0.7rem; padding: 0; border: 0; font-weight: 650; }
   .tab-content { border: 0; padding: 0; }
   .cell { margin: 1.1rem 0 0; }
   margin: 2.4rem 0;            // the tabset takes over the cell's rhythm
+
+  // Bootstrap compiles the tab colours to literals too: the inactive label
+  // would disappear into the dark plane, and the active tab would keep a
+  // white pill. Both read the tokens.
+  .nav-tabs { border-bottom-color: var(--rule); }
+  .nav-link { color: var(--ink-2); }
+  .nav-link:hover { color: var(--ink); border-color: transparent; }
+  .nav-link.active {
+    color: var(--ink);
+    background-color: var(--bg);
+    border-color: var(--rule) var(--rule) var(--bg);
+  }
 }
 
 // ---- Stat block: a finding too small to plot ---------------------------
