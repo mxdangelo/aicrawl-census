@@ -6,6 +6,20 @@ format:
     page-layout: article
     toc: false
     anchor-sections: false
+    include-in-header:
+      text: |
+        <script>
+        // Runs in <head>, before the body paints: a class set from JS after
+        // first paint would flash the light plane on every load.
+        (function () {
+          try {
+            var saved = localStorage.getItem('theme');
+            var dark = saved ? saved === 'dark'
+                             : matchMedia('(prefers-color-scheme: dark)').matches;
+            if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+          } catch (e) {}
+        })();
+        </script>
 execute:
   echo: false
   warning: false
@@ -59,7 +73,11 @@ HTML(charts.signal_cards(df, sig, res))
 ```
 
 ::: {.dateline}
-`{python} n_domains` domains · `{python} n_sectors` sectors · `{python} n_crawlers` crawlers · `{python} snapshot_label` · [Method →](#method)
+[`{python} n_domains` domains · `{python} n_sectors` sectors · `{python} n_crawlers` crawlers · `{python} snapshot_label` · [Method →](#method)]{.dateline-meta}
+<button class="theme-toggle" type="button" aria-label="Switch to dark theme">
+<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+</button>
 :::
 
 ## Block {#block}
@@ -204,6 +222,26 @@ and the aggregated snapshot data are open:
   new IntersectionObserver(function (entries) {
     dl.classList.toggle('is-stuck', !entries[0].isIntersecting);
   }).observe(sentinel);
+})();
+(function () {
+  // Theme toggle. The head script already applied the stored/system choice;
+  // this only flips it and remembers the flip.
+  var btn = document.querySelector('.theme-toggle');
+  if (!btn) return;
+  var root = document.documentElement;
+  function sync() {
+    var dark = root.getAttribute('data-theme') === 'dark';
+    btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+    btn.setAttribute('aria-pressed', String(dark));
+  }
+  btn.addEventListener('click', function () {
+    var dark = root.getAttribute('data-theme') === 'dark';
+    if (dark) root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', 'dark');
+    try { localStorage.setItem('theme', dark ? 'light' : 'dark'); } catch (e) {}
+    sync();
+  });
+  sync();
 })();
 (function () {
   var targets = document.querySelectorAll('main section.level2');
