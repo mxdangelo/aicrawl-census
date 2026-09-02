@@ -9,7 +9,42 @@ $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", sans-serif;
 $line-height-base: 1.65;
 
 /*-- scss:rules --*/
+// ---- Palette tokens ---------------------------------------------------
+// Every colour on the page resolves through these. Dark mode re-points the
+// tokens; nothing below this block knows which theme is active.
+// The dark plane keeps the light plane's warmth — a neutral gray dark would
+// read colder than the off-white it replaces.
+:root {
+  color-scheme: light;
+  --bg:          #f9f9f7;
+  --ink:         #1a1a19;
+  --ink-2:       #52514e;
+  --ink-3:       #898781;
+  --rule:        #e6e4dd;
+  --rule-strong: #d9d8d1;
+  --surface:     #fff;
+  --gray:        #b5b3ab;
+  --focus-ring:  rgba(26, 26, 25, 0.12);
+  --arrow:       "%23898781";
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg:          #141412;
+  --ink:         #eceae4;
+  --ink-2:       #a9a7a0;
+  --ink-3:       #8f8d85;
+  --rule:        #2f2e2a;
+  --rule-strong: #3a3934;
+  --surface:     #1c1c19;
+  --gray:        #6b6960;
+  --focus-ring:  rgba(236, 234, 228, 0.16);
+}
+body { background-color: var(--bg); color: var(--ink); }
 body { font-size: 1.03rem; }
+// Bootstrap compiles $link-color to a literal, which would stay near-black on
+// the dark plane. Links are ink by design (underline carries them, not hue),
+// so point them at the token instead.
+a, a:hover { color: var(--ink); }
 main a { text-decoration: underline; text-underline-offset: 2px; }
 
 // ---- Hero -------------------------------------------------------------
@@ -20,7 +55,7 @@ header#title-block-header { display: none; }
   font-weight: 600;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #52514e;
+  color: var(--ink-2);
   margin-bottom: 0.7rem;
 }
 .lead {
@@ -33,7 +68,7 @@ header#title-block-header { display: none; }
 // Proposition under the kicker: says what the site IS before the finding says
 // what it found. A visitor landing cold needs the noun before the conclusion.
 .proposition {
-  color: #52514e;
+  color: var(--ink-2);
   font-size: 0.98rem;
   margin: 0 0 1.2rem;
 }
@@ -52,27 +87,27 @@ header#title-block-header { display: none; }
   display: flex;
   flex-direction: column;
   padding-top: 0.85rem;
-  border-top: 1px solid #d9d8d1;
+  border-top: 1px solid var(--rule-strong);
   text-decoration: none !important;   // beats `main a` underline
   color: inherit;
   transition: border-color .15s;
 }
-.signal-card:hover { border-top-color: #1a1a19; }
+.signal-card:hover { border-top-color: var(--ink); }
 .signal-figure {
   font-size: 2.1rem;
   font-weight: 650;
   line-height: 1.1;
   letter-spacing: -0.02em;
-  color: #1a1a19;
+  color: var(--ink);
 }
-.signal-what { font-size: 0.95rem; color: #1a1a19; margin-top: 0.15rem; }
+.signal-what { font-size: 0.95rem; color: var(--ink); margin-top: 0.15rem; }
 .signal-note {
   font-size: 0.85rem;
-  color: #898781;
+  color: var(--ink-3);
   margin-top: 0.35rem;
   line-height: 1.45;
 }
-.signal-card:hover .signal-note { color: #52514e; }
+.signal-card:hover .signal-note { color: var(--ink-2); }
 
 @media (max-width: 640px) {
   .signal-cards { grid-template-columns: 1fr; gap: 1.1rem; }
@@ -81,16 +116,16 @@ header#title-block-header { display: none; }
 // the reader never loses the scope (sample, snapshot, Method link). The
 // hairline + background appear only while pinned (.is-stuck, set by JS).
 .dateline {
-  color: #898781;
+  color: var(--ink-3);
   font-size: 0.85rem;
   margin-top: 1.3rem;
   position: sticky;
   top: 0;
   z-index: 5;
-  background: $body-bg;
+  background: var(--bg);
   padding: 0.55rem 0;
 }
-.dateline.is-stuck { border-bottom: 1px solid #e6e4dd; }
+.dateline.is-stuck { border-bottom: 1px solid var(--rule); }
 
 // ---- Section breaks: uniform vertical rhythm -------------------------
 // Spacing lives on the section wrapper, not the h2 — otherwise the first
@@ -98,7 +133,7 @@ header#title-block-header { display: none; }
 main section.level2 {
   margin-top: 4.75rem;
   padding-top: 3rem;
-  border-top: 1px solid #e6e4dd;
+  border-top: 1px solid var(--rule);
 }
 // The first break follows the dateline, which already puts distance after
 // the hero — a full 4.75rem on top of it makes the hero→Block gap read wider
@@ -132,25 +167,25 @@ h2 { margin: 0 0 0.7rem; padding: 0; border: 0; font-weight: 650; }
   font-weight: 650;
   line-height: 1;
   letter-spacing: -0.03em;
-  color: #1a1a19;
+  color: var(--ink);
 }
-.stat-unit { font-size: 1.15rem; color: #52514e; }
-.stat-note { margin: 0.6rem 0 0; font-size: 0.92rem; color: #898781; }
+.stat-unit { font-size: 1.15rem; color: var(--ink-2); }
+.stat-note { margin: 0.6rem 0 0; font-size: 0.92rem; color: var(--ink-3); }
 
 // ---- Table download: quiet affordance, not a call to action ------------
 .table-actions { display: flex; justify-content: flex-end; margin-bottom: 0.6rem; }
 .download-csv {
   font-size: 0.8rem;
   letter-spacing: 0.02em;
-  color: #52514e;
+  color: var(--ink-2);
   text-decoration: none !important;   // beats `main a` underline
-  border: 1px solid #d9d8d1;
+  border: 1px solid var(--rule-strong);
   border-radius: 7px;
   padding: 0.32rem 0.7rem;
-  background: #fff;
+  background: var(--surface);
   transition: border-color .15s, color .15s;
 }
-.download-csv:hover { border-color: #1a1a19; color: #1a1a19; }
+.download-csv:hover { border-color: var(--ink); color: var(--ink); }
 
 // ---- Scroll reveal: light fade+rise; JS gates on prefers-reduced-motion
 .reveal { opacity: 0; transform: translateY(14px);
@@ -178,7 +213,7 @@ h2 { margin: 0 0 0.7rem; padding: 0; border: 0; font-weight: 650; }
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #898781;
+  color: var(--ink-3);
   font-weight: 600;
 }
 .vega-bindings select {
@@ -188,20 +223,63 @@ h2 { margin: 0 0 0.7rem; padding: 0; border: 0; font-weight: 650; }
   min-width: 12rem;
   font: inherit;
   font-size: 0.94rem;
-  color: #1a1a19;
+  color: var(--ink);
   padding: 0.58rem 2.2rem 0.58rem 0.85rem;
-  border: 1px solid #d9d8d1;
+  border: 1px solid var(--rule-strong);
   border-radius: 9px;
-  background-color: #fff;
+  background-color: var(--surface);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23898781' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
   cursor: pointer;
   transition: border-color .15s, box-shadow .15s;
 }
-.vega-bindings select:hover { border-color: #b5b3ab; }
+.vega-bindings select:hover { border-color: var(--gray); }
 .vega-bindings select:focus {
   outline: none;
-  border-color: #1a1a19;
-  box-shadow: 0 0 0 3px rgba(26, 26, 25, 0.12);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
+
+// ---- Charts in dark mode ----------------------------------------------
+// Vega paints the SVG with fill/stroke ATTRIBUTES and no inline styles, and a
+// CSS rule beats a presentation attribute — so the whole chart palette can be
+// re-pointed from here, with no JS and no second render. This needs the SVG
+// renderer (set in charts.py); the canvas default would be untouchable.
+// The verdict ramp inverts: on the dark plane LIGHTER = more restricted, so
+// "blocked" keeps the strongest contrast against the page, as it does on light.
+[data-theme="dark"] .vega-embed {
+  [fill="#1a1a19"] { fill: #f0efe9; }        // accent · blocked · emphasis
+  [fill="#52514e"] { fill: #a9a7a0; }        // axis and value labels
+  [fill="#a7a59e"] { fill: #7a7872; }        // verdict · partial
+  [fill="#dcdad3"] { fill: #3d3c37; }        // verdict · allowed
+  [fill="#cbc9c2"] { fill: #4a4842; }        // de-emphasised bars
+  [fill="#f9f9f7"] { fill: #141412; }        // label sitting ON the accent bar
+  [stroke="#e6e4dd"] { stroke: #2f2e2a; }    // gridlines, axis domain
+}
+// The chevron is a data: URI, so its stroke cannot read a CSS token.
+[data-theme="dark"] .vega-bindings select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a9a7a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+}
+
+// ---- Theme toggle: rides in the dateline -------------------------------
+// It belongs to the page's meta line, not to the content: same ink as the
+// dateline text, no button chrome, and it docks with the sticky bar.
+.dateline { display: flex; align-items: center; gap: 0.75rem; }
+.dateline-meta { flex: 1 1 auto; }
+.theme-toggle {
+  flex: none;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0.2rem;
+  line-height: 0;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color .15s;
+}
+.theme-toggle:hover { color: var(--ink); }
+.theme-toggle svg { display: block; width: 15px; height: 15px; }
+.theme-toggle .moon { display: none; }
+[data-theme="dark"] .theme-toggle .sun { display: none; }
+[data-theme="dark"] .theme-toggle .moon { display: block; }

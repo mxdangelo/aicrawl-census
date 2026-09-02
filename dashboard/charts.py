@@ -10,7 +10,10 @@ import pandas as pd
 import theme
 
 # Hide the Vega action menu (the "···" export dropdown) on every chart.
-alt.renderers.set_embed_options(actions=False)
+# renderer="svg" is load-bearing, not a preference: the SVG renderer paints
+# fill/stroke as attributes, which CSS can re-point for dark mode (see
+# theme.scss). The canvas default would bake the light palette into pixels.
+alt.renderers.set_embed_options(actions=False, renderer="svg")
 
 # Reader-facing sector names (the data carries database slugs).
 SECTOR_LABELS = {
