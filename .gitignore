@@ -40,6 +40,9 @@ STUDY-GUIDE.md
 presentazione_homerwork_1_dangelo.pptx
 presentazione_homerwork_1_dangelo.pdf
 
+# Agent config and skills: local tooling, not part of the observatory.
+.claude/
+
 # --- Dashboard: local preview render (throwaway) ---
 dashboard/_preview.html
 
