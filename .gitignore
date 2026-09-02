@@ -28,6 +28,7 @@ Thumbs.db
 # only its validated palette will be salvaged into the dashboard theme.
 run_report.py
 run_figures.py
+run_deck_figures.py
 report.html
 figures/
 slides.md
