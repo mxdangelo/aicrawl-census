@@ -127,6 +127,16 @@ header#title-block-header { display: none; }
 }
 .dateline.is-stuck { border-bottom: 1px solid var(--rule); }
 
+// ---- The fold's chart caption -----------------------------------------
+// The hero chart carries the finding, so it needs the one line the section
+// prose used to give it. Dateline ink, not body ink — it labels, it doesn't
+// argue.
+.fold-caption {
+  color: var(--ink-3);
+  font-size: 0.85rem;
+  margin-top: -1.2rem;      // the tabset's own 2.4rem rhythm is too wide here
+}
+
 // ---- Section breaks: uniform vertical rhythm -------------------------
 // Spacing lives on the section wrapper, not the h2 — otherwise the first
 // section's h2 top-margin collapses to zero and reads cramped vs the rest.
