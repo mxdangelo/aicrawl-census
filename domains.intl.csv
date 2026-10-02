@@ -1,134 +1,301 @@
-domain,sector,home,reach,surfaced_in,note
-ikea.com,ecommerce,SE,global,FR,ikea.fr redirects to ikea.com/fr
-deichmann.com,ecommerce,DE,europe,DE,one host for all countries
-thetrainline.com,travel_tourism,GB,europe,FR,trainline.fr redirects here
-getyourguide.com,travel_tourism,DE,global,FR,getyourguide.fr redirects to global host
-all.accor.com,travel_tourism,FR,global,FR,Accor group booking host
-lufthansa.com,travel_tourism,DE,global,DE,one host for all countries
-eurowings.com,travel_tourism,DE,europe,DE,one host for all countries
-condor.com,travel_tourism,DE,global,DE,one host for all countries
-komoot.com,travel_tourism,DE,global,DE,one host for all countries
-n26.com,banking_insurance,DE,europe,DE,one host for all countries
-traderepublic.com,banking_insurance,DE,europe,DE,one host for all countries
-sumup.com,banking_insurance,GB,global,FR,sumup.fr redirects to global host
-helvetia.com,banking_insurance,CH,europe,FR,helvetia.fr redirects to global host
-hostinger.com,telco_utilities,LT,global,FR,hostinger.fr redirects to global host
-hetzner.com,telco_utilities,DE,global,DE,one host for all countries
-fritz.com,telco_utilities,DE,europe,DE,avm.de redirects here
-dpd.com,telco_utilities,FR,europe,DE,parcel service; one host with country paths
-suez.com,telco_utilities,FR,global,FR,suez.fr redirects to global host
-deezer.com,media_lifestyle,FR,global,FR,French company; one international host
-dailymotion.com,media_lifestyle,FR,global,FR,French company; one international host
-crunchyroll.com,media_lifestyle,US,global,FR,no French host
-zattoo.com,media_lifestyle,CH,europe,DE,one host for all countries
-yahoo.com,media_lifestyle,US,global,FR,global host; country editions (fr.yahoo.com) are in country samples
-businessinsider.com,news,US,global,FR,businessinsider.fr redirects to global host
-engelvoelkers.com,real_estate,DE,global,DE,one host for all countries
-unibet.com,betting_gaming,SE,global,FR,global host; unibet.fr is in the French sample
-interwetten.com,betting_gaming,AT,europe,DE,global host
-deutsche-boerse.com,banking_insurance,DE,global,DE,boerse-frankfurt.de redirects; global
-netcup.com,telco_utilities,DE,europe,DE,netcup.de redirects; international host
-link.springer.com,publishing_education,DE,global,DE,springer.de redirects; global
-dpa.com,news,DE,global,DE,dpa.de redirects; global
-fraport.com,travel_tourism,DE,global,DE,fraport.de redirects; global corporate
-motel-one.com,travel_tourism,DE,europe,DE,global host
-tibber.com,telco_utilities,NO,europe,DE,global host
-scalable.capital,banking_insurance,DE,europe,DE,pan-European host
-euronews.com,news,FR,global,DE,global host
-lottoland.com,betting_gaming,GI,global,DE,global host
-merkur24.com,betting_gaming,DE,europe,DE,merkur24.de redirects to global social-casino host
-crazybuzzer.com,betting_gaming,DE,europe,DE,crazybuzzer.de redirects; social casino
-benetton.com,ecommerce,IT,global,IT,77 locale editions on one host
-intimissimi.com,ecommerce,IT,global,IT,45 locale editions
-tezenis.com,ecommerce,IT,global,IT,35 locale editions
-calzedonia.com,ecommerce,IT,global,IT,country paths (/it/) on one host
-yoox.com,ecommerce,IT,global,IT,country paths (/it/) on one host
-luisaviaroma.com,ecommerce,IT,global,IT,"7 language editions, worldwide shipping"
-kikocosmetics.com,ecommerce,IT,global,IT,country paths (/it-it/) on one host
-terranovastyle.com,ecommerce,IT,europe,IT,18 locale editions
-lastminute.com,travel_tourism,CH,global,IT,"30 locale editions; group HQ Switzerland, run from Italy (home to verify)"
-ita-airways.com,travel_tourism,IT,global,IT,country/language paths
-eni.com,telco_utilities,IT,global,IT,group corporate host; eniplenitude.com stays in Italy
-moneyfarm.com,banking_insurance,IT,europe,IT,"redirects to /uk/ from Italy; founded in Milan, HQ London (home to verify)"
-luxuryestate.com,real_estate,IT,global,IT,23 country market paths
-docsity.com,publishing_education,IT,global,IT,"country-coded editions (/en/usa/, /es/esp/)"
-joivy.com,real_estate,IT,europe,IT,"dovevivo.com redirects here; IT, ES, PT, FR on one host"
-carpisa.it,ecommerce,IT,europe,IT,"/de-de, /fr-fr, /es-es paths on one host"
-888casino.com,betting_gaming,GI,global,UK,multi-market host
-888sport.com,betting_gaming,GI,global,UK,multi-market host
-bet365.com,betting_gaming,GB,global,UK,"one host, many markets/languages"
-betfair.com,betting_gaming,GB,global,UK,30+ country hreflang
-bloomsbury.com,publishing_education,GB,global,UK,au/ca/gb/in/us editions
-boden.com,ecommerce,GB,global,UK,boden.co.uk 301s here
-boylesports.com,betting_gaming,IE,europe,UK,"Irish-first, IE+UK"
-britishairways.com,travel_tourism,GB,global,UK,country selector
-britishcouncil.org,publishing_education,GB,global,UK,worldwide host
-cambridge.org,publishing_education,GB,global,UK,global publisher host
-clearpay.com,banking_insurance,US,europe,UK,UK/FR/ES/IT on one host
-depop.com,ecommerce,GB,global,UK,country paths
-dhl.com,telco_utilities,DE,global,UK,dhlecommerce.co.uk 301s here
-dk.com,publishing_education,GB,global,UK,in/us editions
-doctify.com,health,GB,europe,UK,country paths /uk/
-easyjet.com,travel_tourism,GB,europe,UK,multi-country language paths
-eurostar.com,travel_tourism,GB,europe,UK,country paths /rw-en
-futurelearn.com,publishing_education,GB,global,UK,global MOOC
-givemesport.com,news,CA,global,UK,"Valnet, global audience"
-global.oup.com,publishing_education,GB,global,UK,oup.co.uk 301s here
-goodhousekeeping.com,media_lifestyle,US,global,UK,goodhousekeeping.co.uk 301s to /uk path
-group.mandg.com,banking_insurance,GB,global,UK,prudential.co.uk 301s to group site
-hellomagazine.com,media_lifestyle,ES,global,UK,us/ca editions on host
-itpro.com,news,GB,global,UK,gb/ie/us editions
-jll.com,real_estate,US,global,UK,jll.co.uk 301s here
-livescorebet.com,betting_gaming,GB,global,UK,gb/ie/ng editions
-lookfantastic.com,ecommerce,GB,global,UK,20 country editions
-loudersound.com,media_lifestyle,GB,global,UK,Future global music site
-mandmdirect.com,ecommerce,GB,europe,UK,country path /gb/en
-megabus.com,travel_tourism,GB,global,UK,ca/gb/us editions
-newlook.com,ecommerce,GB,europe,UK,country path /uk
-oddschecker.com,betting_gaming,GB,global,UK,country paths /it/
-ospreypublishing.com,publishing_education,GB,global,UK,country paths /UK/
-personalinvesting.jpmorgan.com,banking_insurance,US,global,UK,nutmeg.com 301s here
-planetrugby.com,news,GB,global,UK,multi-country hreflang
-pocket-lint.com,news,CA,global,UK,"Valnet, global audience"
-premierinn.com,travel_tourism,GB,europe,UK,/gb/en; German hotels on same host
-riverisland.com,ecommerce,GB,global,UK,multi-country hreflang
-seetickets.com,media_lifestyle,GB,europe,UK,ch/es/fr/nl/pt hreflang
-selfridges.com,ecommerce,GB,global,UK,country paths /IT/en/
-senecalearning.com,publishing_education,GB,global,UK,"/en-gb path, US edition"
-shpock.com,ecommerce,AT,europe,UK,country paths
-skyscanner.net,travel_tourism,GB,global,UK,global metasearch
-spectator.com,news,GB,global,UK,spectator.co.uk 301s here; hreflang gb+us
-squawka.com,news,GB,global,UK,br/nl/us editions
-t3.com,news,GB,global,UK,multi-country hreflang
-taylorandfrancis.com,publishing_education,GB,global,UK,tandf.co.uk 301s here
-teachingenglish.org.uk,publishing_education,GB,global,UK,worldwide audience
-tes.com,publishing_education,GB,global,UK,au/gb editions
-theconversation.com,news,AU,global,UK,edition paths
-theguardian.com,news,GB,global,UK,UK/US/AU/Europe editions on one host
-theweek.com,news,US,global,UK,theweek.co.uk 301s to theweek.com/uk
-thomsonreuters.com,publishing_education,CA,global,UK,thomsonreuters.co.uk 301s here
-timeout.com,media_lifestyle,GB,global,UK,city paths worldwide
-timeshighereducation.com,publishing_education,GB,global,UK,global audience
-tkmaxx.com,ecommerce,US,europe,UK,country selector landing page
-usborne.com,publishing_education,GB,global,UK,country paths /it/
-videoslots.com,betting_gaming,MT,global,UK,multi-market
-virginatlantic.com,travel_tourism,GB,global,UK,country paths /en-EU
-vodafone.com,telco_utilities,GB,global,UK,group host
-whitestuff.com,ecommerce,GB,global,UK,/eu /us paths
-wired.com,news,US,global,UK,wired.co.uk 301s here
-womanandhome.com,media_lifestyle,GB,global,UK,/us edition
-penguinlibros.com,publishing_education,ES,global,ES,country paths /es/ /ar/ /mx/ /co/ /cl/ /pe/ on one host
-centraldereservas.com,travel_tourism,ES,global,ES,country paths /ar /mx /co /cl /pe on one host
-destinia.com,travel_tourism,ES,global,ES,country/language paths /fr/ /pt/ /it/ /de/ /en/ on one host
-iberia.com,travel_tourism,ES,global,ES,"country paths (/it/ served here), 90+ hreflang editions"
-vueling.com,travel_tourism,ES,europe,ES,"country paths, it-it/fr-fr/de-de editions on one host"
-volotea.com,travel_tourism,ES,europe,ES,de-de/fr-fr/it-it/el-gr editions on one host
-smartick.com,publishing_education,ES,global,ES,smartick.es redirects; en-gb/es-mx/es-co editions
-wolterskluwer.com,publishing_education,NL,global,ES,wolterskluwer.es redirects to /es-es/
-elsevier.com,publishing_education,NL,global,ES,elsevier.es redirects to /es-es
-gls-group.com,telco_utilities,NL,europe,ES,gls-spain.es redirects to group host
-nh-hotels.com,travel_tourism,ES,global,ES,nh-hoteles.es redirects to global host
-cervantes.org,publishing_education,ES,global,ES,cervantes.es redirects; Instituto Cervantes centres worldwide
-tirant.com,publishing_education,ES,global,ES,country paths /mx /co /cl on one host
-grupo-sm.com,publishing_education,ES,global,ES,country paths /mx /co /cl /chile on one host
-aireuropa.com,travel_tourism,ES,global,ES,"country/market selector (JS app; paths not visible from probe - per knowledge, unverified)"
+domain,sector,home,reach,note
+bis.org,pa,CH,global,central-bank body
+eib.org,pa,LU,europe,EU development bank
+europa.eu,pa,BE,europe,EU portal
+commission.europa.eu,pa,BE,europe,European Commission
+europarl.europa.eu,pa,BE,europe,European Parliament; no robots.txt rules seen
+consilium.europa.eu,pa,BE,europe,Council of the EU
+curia.europa.eu,pa,LU,europe,Court of Justice of the EU
+eur-lex.europa.eu,pa,LU,europe,EU law portal; no robots.txt rules seen
+ecb.europa.eu,pa,DE,europe,European Central Bank
+ema.europa.eu,pa,NL,europe,EU medicines agency
+ecdc.europa.eu,pa,SE,europe,EU disease-control agency
+efsa.europa.eu,pa,IT,europe,EU agency
+who.int,pa,CH,global,UN agency
+un.org,pa,US,global,UN
+news.un.org,pa,US,global,UN news service; not observable from here (406)
+unesco.org,pa,FR,global,UN agency; not observable from here (no response); no robots.txt rules seen
+worldbank.org,pa,US,global,development bank
+oecd.org,pa,FR,global,international organisation; not observable from here (403)
+fao.org,pa,IT,global,UN agency
+unicef.org,pa,US,global,UN agency
+itu.int,pa,CH,global,UN agency
+imf.org,pa,US,global,international financial institution; not observable from here (403)
+coe.int,pa,FR,europe,Council of Europe; 7 country-coded hreflang editions on one host
+wipo.int,pa,CH,global,UN agency
+ilo.org,pa,CH,global,UN agency
+undp.org,pa,US,global,UN programme
+iea.org,pa,FR,global,intergovernmental agency
+ohchr.org,pa,CH,global,UN office
+esa.int,pa,FR,europe,intergovernmental space agency
+unep.org,pa,KE,global,UN programme
+ipcc.ch,pa,CH,global,UN body
+unhcr.org,pa,CH,global,UN agency; not observable from here (403); no robots.txt rules seen
+unfccc.int,pa,DE,global,UN secretariat
+unwomen.org,pa,US,global,UN entity
+nato.int,pa,BE,global,international organisation; x-default global edition
+unece.org,pa,CH,europe,UN regional commission; not observable from here (403); no robots.txt rules seen
+wto.org,pa,CH,global,international organisation
+iaea.org,pa,AT,global,UN-related agency; not observable from here (403)
+wmo.int,pa,CH,global,UN agency
+unodc.org,pa,AT,global,UN office
+icrc.org,pa,CH,global,international humanitarian body; x-default global edition
+iom.int,pa,CH,global,UN agency
+wfp.org,pa,IT,global,UN agency
+theguardian.com,news,GB,global,edition paths /uk /us /au /international
+bbc.com,news,GB,global,BBC international host
+reuters.com,news,GB,global,international news agency; not observable from here (401)
+ft.com,news,GB,global,international business daily
+sofascore.com,news,HR,global,global scores
+flashscore.com,news,CZ,global,global scores
+goal.com,news,GB,global,country editions on one host; 55 country-coded hreflang editions on one host
+gsmarena.com,news,BG,global,global tech
+hltv.org,news,DK,global,esports
+economist.com,news,GB,global,international weekly; not observable from here (403)
+theconversation.com,news,AU,global,country editions on one host
+livescore.com,news,GB,global,global scores; x-default global edition
+dw.com,news,DE,global,international broadcaster
+aljazeera.com,news,QA,global,international broadcaster
+investing.com,news,CY,global,global financial portal; x-default global edition
+fifa.com,news,CH,global,international sport body
+euronews.com,news,FR,europe,pan-European broadcaster
+techradar.com,news,GB,global,edition paths; 16 country-coded hreflang editions on one host
+fotmob.com,news,NO,global,global scores; 3 country-coded hreflang editions on one host
+olympics.com,news,CH,global,international sport body
+uefa.com,news,CH,europe,European football body
+politico.eu,news,BE,europe,pan-European outlet; x-default global edition
+formula1.com,news,GB,global,international championship
+365scores.com,news,IL,global,global scores
+thenextweb.com,news,NL,global,global tech
+atptour.com,news,GB,global,international tour; not observable from here (403)
+transfermarkt.com,news,DE,global,international edition; x-default global edition
+swissinfo.ch,news,CH,global,international service; 9 country-coded hreflang editions on one host
+procyclingstats.com,news,BE,global,international cycling
+onefootball.com,news,DE,global,global app; x-default global edition
+rferl.org,news,CZ,europe,international broadcaster
+notebookcheck.net,news,DE,global,international edition
+afp.com,news,FR,global,international news agency; x-default global edition
+motorsport.com,news,US,global,country editions
+motogp.com,news,ES,global,international championship
+eurosport.com,news,FR,europe,pan-European sport host; Italian visitor sent to eurosport.it
+pocket-lint.com,news,CA,global,tech
+euobserver.com,news,BE,europe,pan-European outlet
+cyclingnews.com,news,GB,global,international cycling
+itpro.com,news,GB,global,tech; 3 country-coded hreflang editions on one host
+occrp.org,news,NL,global,international investigative
+wikipedia.org,publishing_education,US,global,"encyclopedia, language subdomains"
+archive.org,publishing_education,US,global,digital library
+sciencedirect.com,publishing_education,NL,global,scientific platform
+researchgate.net,publishing_education,DE,global,research platform; not observable from here (403)
+wikimedia.org,publishing_education,US,global,Wikimedia; no robots.txt rules seen
+link.springer.com,publishing_education,DE,global,scientific publisher; no robots.txt rules seen
+nature.com,publishing_education,GB,global,scientific publisher; no robots.txt rules seen
+issuu.com,publishing_education,US,global,publishing platform
+duolingo.com,publishing_education,US,global,language learning; x-default global edition
+arxiv.org,publishing_education,US,global,research platform
+statista.com,publishing_education,DE,global,data platform
+global.oup.com,publishing_education,GB,global,university press; no robots.txt rules seen
+academic.oup.com,publishing_education,GB,global,scientific platform; not observable from here (403)
+tandfonline.com,publishing_education,GB,global,scientific publisher; not observable from here (403)
+mdpi.com,publishing_education,CH,global,scientific publisher
+cambridge.org,publishing_education,GB,global,university press; not observable from here (403)
+dictionary.cambridge.org,publishing_education,GB,global,dictionary; 8 country-coded hreflang editions on one host
+ted.com,publishing_education,US,global,talks
+deepl.com,publishing_education,DE,global,translation
+academia.edu,publishing_education,US,global,research platform
+frontiersin.org,publishing_education,CH,global,scientific publisher
+coursera.org,publishing_education,US,global,MOOC; x-default global edition
+wiktionary.org,publishing_education,US,global,Wikimedia
+bmj.com,publishing_education,GB,global,medical journal
+elsevier.com,publishing_education,NL,global,scientific publisher; 28 country-coded hreflang editions on one host
+udemy.com,publishing_education,US,global,MOOC
+orcid.org,publishing_education,US,global,research infrastructure
+thelancet.com,publishing_education,GB,global,medical journal; not observable from here (403)
+thomsonreuters.com,publishing_education,CA,global,publisher
+iopscience.iop.org,publishing_education,GB,global,scientific platform
+calameo.com,publishing_education,FR,global,publishing platform
+pubs.rsc.org,publishing_education,GB,global,scientific platform; not observable from here (403)
+yumpu.com,publishing_education,CH,global,publishing platform
+reverso.net,publishing_education,FR,global,dictionary; not observable from here (403); no robots.txt rules seen
+edx.org,publishing_education,US,global,MOOC
+zenodo.org,publishing_education,CH,global,research repository
+apple.com,ecommerce,US,global,country paths; 136 country-coded hreflang editions on one host
+samsung.com,ecommerce,KR,global,country paths
+hp.com,ecommerce,US,global,country paths; not observable from here (no response); no robots.txt rules seen
+alibaba.com,ecommerce,CN,global,global B2B marketplace; x-default global edition
+dell.com,ecommerce,US,global,country paths
+etsy.com,ecommerce,US,global,global marketplace; not observable from here (403)
+mi.com,ecommerce,CN,global,country paths; x-default global edition
+aliexpress.com,ecommerce,CN,global,global marketplace
+temu.com,ecommerce,IE,global,country paths
+ikea.com,ecommerce,SE,global,country paths; 92 country-coded hreflang editions on one host
+nike.com,ecommerce,US,global,country paths
+lenovo.com,ecommerce,HK,global,country paths; 40 country-coded hreflang editions on one host
+hm.com,ecommerce,SE,global,country paths; not observable from here (403)
+tesla.com,ecommerce,US,global,country paths; not observable from here (403)
+logitech.com,ecommerce,CH,global,country paths; 47 country-coded hreflang editions on one host
+lego.com,ecommerce,DK,global,country paths; not observable from here (403)
+philips.com,ecommerce,NL,global,country paths; Italian visitor sent to philips.it
+adidas.com,ecommerce,DE,global,country paths; not observable from here (403)
+zara.com,ecommerce,ES,global,country paths
+porsche.com,ecommerce,DE,global,country paths; 82 country-coded hreflang editions on one host
+uniqlo.com,ecommerce,JP,global,country paths; not observable from here (403)
+farfetch.com,ecommerce,GB,global,country paths; 100 country-coded hreflang editions on one host
+volvocars.com,ecommerce,SE,global,country paths
+joom.com,ecommerce,LV,global,global marketplace
+nespresso.com,ecommerce,CH,global,country paths
+mango.com,ecommerce,ES,global,country paths
+louisvuitton.com,ecommerce,FR,global,country paths; x-default global edition
+swarovski.com,ecommerce,AT,global,country paths; 66 country-coded hreflang editions on one host
+depop.com,ecommerce,GB,global,global marketplace; 9 country-coded hreflang editions on one host
+catawiki.com,ecommerce,NL,europe,country paths
+booking.com,travel_tourism,NL,global,country-language paths
+uber.com,travel_tourism,US,global,ride-hailing; 166 country-coded hreflang editions on one host
+ryanair.com,travel_tourism,IE,europe,country paths
+agoda.com,travel_tourism,SG,global,country-language paths
+flightradar24.com,travel_tourism,SE,global,flight tracking
+trip.com,travel_tourism,SG,global,country-language paths
+ihg.com,travel_tourism,GB,global,global host; 6 country-coded hreflang editions on one host
+getyourguide.com,travel_tourism,DE,global,global host; 44 country-coded hreflang editions on one host; no robots.txt rules seen
+all.accor.com,travel_tourism,FR,global,global host; x-default global edition
+lonelyplanet.com,travel_tourism,US,global,travel guide
+komoot.com,travel_tourism,DE,global,global app; x-default global edition
+britishairways.com,travel_tourism,GB,global,country paths; not observable from here (no response); no robots.txt rules seen
+rome2rio.com,travel_tourism,AU,global,global host; x-default global edition
+easyjet.com,travel_tourism,GB,europe,country paths; not observable from here (403)
+rentalcars.com,travel_tourism,GB,global,global host; 7 country-coded hreflang editions on one host
+viator.com,travel_tourism,US,global,global host; 25 country-coded hreflang editions on one host
+thetrainline.com,travel_tourism,GB,europe,country paths; 8 country-coded hreflang editions on one host
+lufthansa.com,travel_tourism,DE,global,country paths; not observable from here (403)
+wizzair.com,travel_tourism,HU,europe,country paths
+emirates.com,travel_tourism,AE,global,country paths; not observable from here (403)
+radissonhotels.com,travel_tourism,BE,global,global host; not observable from here (403)
+turkishairlines.com,travel_tourism,TR,global,country paths
+qatarairways.com,travel_tourism,QA,global,country paths; 131 country-coded hreflang editions on one host
+bolt.eu,travel_tourism,EE,europe,ride-hailing; 105 country-coded hreflang editions on one host
+finnair.com,travel_tourism,FI,global,country paths
+swiss.com,travel_tourism,CH,global,country paths
+omio.com,travel_tourism,DE,europe,24 country-coded hreflang editions on one host
+paypal.com,banking_insurance,US,global,country paths
+stripe.com,banking_insurance,US,global,country paths; 77 country-coded hreflang editions on one host
+binance.com,banking_insurance,AE,global,"global exchange, no single home market"
+wise.com,banking_insurance,GB,global,country paths; 31 country-coded hreflang editions on one host
+mastercard.com,banking_insurance,US,global,211 country-coded hreflang editions on one host
+klarna.com,banking_insurance,SE,global,country paths; 35 country-coded hreflang editions on one host
+paysafecard.com,banking_insurance,AT,global,country paths; 78 country-coded hreflang editions on one host
+adyen.com,banking_insurance,NL,global,20 country-coded hreflang editions on one host
+ubs.com,banking_insurance,CH,global,country paths
+sumup.com,banking_insurance,GB,global,country paths
+crypto.com,banking_insurance,SG,global,41 country-coded hreflang editions on one host
+westernunion.com,banking_insurance,US,global,country paths (/it/ served to Italian visitor)
+revolut.com,banking_insurance,GB,global,country paths
+etoro.com,banking_insurance,IL,global,8 country-coded hreflang editions on one host
+hsbc.com,banking_insurance,GB,global,group site
+ig.com,banking_insurance,GB,global,country paths; 21 country-coded hreflang editions on one host
+allianz.com,banking_insurance,DE,global,group site
+ing.com,banking_insurance,NL,global,group site
+bitstamp.net,banking_insurance,LU,global,global exchange
+xtb.com,banking_insurance,PL,europe,country paths; 5 country-coded hreflang editions on one host
+traderepublic.com,banking_insurance,DE,europe,country paths
+euronext.com,banking_insurance,NL,europe,pan-European exchange
+plus500.com,banking_insurance,IL,global,66 country-coded hreflang editions on one host
+skrill.com,banking_insurance,GB,global,3 country-coded hreflang editions on one host
+n26.com,banking_insurance,DE,europe,country paths
+google.com,media_lifestyle,US,global,"global search, country domains secondary"
+facebook.com,media_lifestyle,US,global,global platform
+youtube.com,media_lifestyle,US,global,global platform
+instagram.com,media_lifestyle,US,global,global platform; 29 country-coded hreflang editions on one host
+linkedin.com,media_lifestyle,US,global,global platform; not observable from here (403)
+bing.com,media_lifestyle,US,global,global search
+netflix.com,media_lifestyle,US,global,country paths
+x.com,media_lifestyle,US,global,global platform
+tiktok.com,media_lifestyle,SG,global,global platform
+whatsapp.com,media_lifestyle,US,global,global platform; 3 country-coded hreflang editions on one host
+roblox.com,media_lifestyle,US,global,gaming; x-default global edition
+spotify.com,media_lifestyle,SE,global,country paths
+msn.com,media_lifestyle,US,global,"portal, country-language paths"
+vimeo.com,media_lifestyle,US,global,global platform; x-default global edition
+epicgames.com,media_lifestyle,US,global,gaming; no robots.txt rules seen
+discord.com,media_lifestyle,US,global,global platform
+soundcloud.com,media_lifestyle,DE,global,global platform
+twitch.tv,media_lifestyle,US,global,global platform; 4 country-coded hreflang editions on one host
+telegram.org,media_lifestyle,AE,global,global platform; no robots.txt rules seen
+steampowered.com,media_lifestyle,US,global,gaming
+dailymotion.com,media_lifestyle,FR,global,global host
+quora.com,media_lifestyle,US,global,community
+fandom.com,media_lifestyle,US,global,community
+playstation.com,media_lifestyle,JP,global,gaming; 100 country-coded hreflang editions on one host
+speedtest.net,telco_utilities,US,global,x-default global edition
+one.com,telco_utilities,DK,europe,14 country-coded hreflang editions on one host
+hostinger.com,telco_utilities,LT,global,32 country-coded hreflang editions on one host
+hetzner.com,telco_utilities,DE,global,x-default global edition
+dhl.com,telco_utilities,DE,global,"global parcel network, country paths"
+nordvpn.com,telco_utilities,LT,global,not observable from here (no response); no robots.txt rules seen
+proton.me,telco_utilities,CH,global,3 country-coded hreflang editions on one host
+17track.net,telco_utilities,CN,global,parcel tracking; x-default global edition
+telefonica.com,telco_utilities,ES,global,group site
+orange.com,telco_utilities,FR,global,group site; not observable from here (no response); no robots.txt rules seen
+shell.com,telco_utilities,GB,global,"group site, global"
+vodafone.com,telco_utilities,GB,global,group site
+bp.com,telco_utilities,GB,global,x-default global edition
+telekom.com,telco_utilities,DE,global,group site
+dpd.com,telco_utilities,FR,europe,"European parcel network, country paths"
+gls-group.com,telco_utilities,NL,europe,x-default global edition
+totalenergies.com,telco_utilities,FR,global,x-default global edition
+eni.com,telco_utilities,IT,global,"group site, global"
+iberdrola.com,telco_utilities,ES,global,"group site, operations in several countries"
+contabo.com,telco_utilities,DE,global,x-default global edition
+fritz.com,telco_utilities,DE,europe,27 country-coded hreflang editions on one host
+tibber.com,telco_utilities,NO,europe,several European markets on one host
+ouraring.com,health,FI,global,health device; x-default global edition
+roche.com,health,CH,global,pharma group
+bayer.com,health,DE,global,pharma group; x-default global edition
+msdmanuals.com,health,US,global,"medical reference, language paths; x-default global edition"
+cochrane.org,health,GB,global,international evidence network
+novartis.com,health,CH,global,pharma group
+gsk.com,health,GB,global,pharma group
+astrazeneca.com,health,GB,global,pharma group
+boehringer-ingelheim.com,health,DE,global,pharma group
+siemens-healthineers.com,health,DE,global,medtech group
+merckgroup.com,health,DE,global,pharma group; 34 country-coded hreflang editions on one host
+withings.com,health,FR,global,health device; 27 country-coded hreflang editions on one host
+escardio.org,health,FR,europe,European society
+msf.org,health,CH,global,international medical NGO
+flo.health,health,GB,global,health app
+sanofi.com,health,FR,global,pharma group; x-default global edition
+novonordisk.com,health,DK,global,pharma group; no robots.txt rules seen
+takeda.com,health,JP,global,pharma group; 73 country-coded hreflang editions on one host
+orpha.net,health,FR,europe,rare-disease portal; no robots.txt rules seen
+helloclue.com,health,DE,global,health app; x-default global edition
+forebet.com,betting_gaming,CY,global,not observable from here (403)
+bet365.com,betting_gaming,GB,global,3 country-coded hreflang editions on one host
+betano.com,betting_gaming,GR,global,no robots.txt rules seen
+betfair.com,betting_gaming,GB,global,Italian visitor sent to betfair.it
+superbet.com,betting_gaming,RO,europe,not observable from here (451); no robots.txt rules seen
+betway.com,betting_gaming,MT,global,Italian visitor sent to betway.it; no robots.txt rules seen
+partypoker.com,betting_gaming,GI,global,Italian visitor sent to giocodigitale.it
+bwin.com,betting_gaming,GI,global,Italian visitor sent to bwin.it
+pokerstars.com,betting_gaming,IM,global,Italian visitor sent to pokerstars.it
+unibet.com,betting_gaming,MT,global,"global operator, country sites separate"
+betsson.com,betting_gaming,MT,global,Italian visitor sent to betsson.it
+oddsportal.com,betting_gaming,CZ,global,Italian visitor sent to centroquote.it
+888casino.com,betting_gaming,GI,global,Italian visitor sent to 888casino.it
+leovegas.com,betting_gaming,SE,global,Italian visitor sent to leovegas.it
+boylesports.com,betting_gaming,IE,europe,not observable from here (403); no robots.txt rules seen
+livescorebet.com,betting_gaming,GB,europe,3 country-coded hreflang editions on one host
+pinnacle.com,betting_gaming,CW,global,Italian visitor sent to pinnacle.it; no robots.txt rules seen
+cbre.com,real_estate,US,global,"global group site, country paths"
+jll.com,real_estate,US,global,"global group site, country paths"
+engelvoelkers.com,real_estate,DE,global,60 country-coded hreflang editions on one host
+cushmanwakefield.com,real_estate,US,global,61 country-coded hreflang editions on one host
+colliers.com,real_estate,CA,global,113 country-coded hreflang editions on one host
+jamesedition.com,real_estate,NL,global,not observable from here (403)
+savills.com,real_estate,GB,global,x-default global edition
+housinganywhere.com,real_estate,NL,europe,x-default global edition
+spotahome.com,real_estate,ES,europe,x-default global edition
+knightfrank.com,real_estate,GB,global,x-default global edition
+luxuryestate.com,real_estate,IT,global,x-default global edition
+uniplaces.com,real_estate,PT,europe,student rentals in several countries
+properstar.com,real_estate,CH,global,not observable from here (403)
+tipico.com,betting_gaming,MT,europe,licensed in Germany and Austria; one host for several markets
+888sport.com,betting_gaming,GI,global,"888 Holdings; country editions elsewhere, .com serves several markets"

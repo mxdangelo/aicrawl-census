@@ -54,6 +54,8 @@ n_domains = int(sig["n_domains"].sum())
 one_crawler = df[df["crawler"] == df["crawler"].iloc[0]]
 n_unobserved = int(one_crawler.loc[one_crawler["source"] == "unobservable", "n_domains"].sum())
 n_observed = n_domains - n_unobserved
+n_llms = int(sig["llms_hand"].sum() + sig["llms_generated"].sum())
+llms_share = f"{100 * n_llms / n_domains:.1f}%"
 n_sectors = df["sector"].nunique()
 n_crawlers = df["crawler"].nunique()
 snapshot_label = (f"snapshot {snapshot}" if n_snapshots == 1
@@ -142,11 +144,11 @@ for the other slices.
 
 The opposite move. **llms.txt** (a 2024 convention) is a Markdown file that
 *offers* a curated view of a site to language models — "here is what to read
-about us." Almost nobody uses it: **58 of 543 sites, 10.7%**. And the lead is
+about us." Almost nobody uses it: **`{python} n_llms` of `{python} n_domains` sites, `{python} llms_share`**. And the lead is
 an unexpected sector — **banking**, where more than 1 in 3 sites publish one,
 and every one is hand-written, not shipped by a plugin.
 
-The chart below counts only those 58 publishers — not the whole sample — and
+The chart below counts only those `{python} n_llms` publishers — not the whole sample — and
 splits each sector's bar by where the file came from: ink for a hand-written
 file, gray for a plugin default. That split is the question this section asks:
 how much of the adoption was a decision rather than a side effect. Sector

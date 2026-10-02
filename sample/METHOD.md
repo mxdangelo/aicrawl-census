@@ -11,7 +11,7 @@ this file states the rules they apply.
 | `domains.uk.csv` | United Kingdom | 804 |
 | `domains.fr.csv` | France | 494 |
 | `domains.es.csv` | Spain | 361 |
-| `domains.intl.csv` | international hosts | 133 |
+| `domains.intl.csv` | international hosts | 300 |
 
 `CENSUS_COUNTRY` (IT by default) picks which list and database a pipeline run
 uses: `CENSUS_COUNTRY=FR py run_fetch.py` reads `domains.fr.csv` and writes
@@ -79,11 +79,15 @@ country). The regional tier is close to a full population where it exists (all
 
 ## The international list
 
-`domains.intl.csv` holds the hosts excluded by rules 2 and 3, with the company's
-`home` country and its `reach` (`europe` or `global`). It is a by-product of the
-country drafts, not a designed sample: the largest global platforms are absent
-because no country draft surfaced them. Crawling it needs its own selection pass.
-The `home` and `reach` values come from general knowledge and are unverified.
+`domains.intl.csv` holds 300 hosts with no single primary market: platforms,
+brands and international bodies that serve several countries from one host. It
+follows the same rules as the country samples and Italy's sector proportions;
+`pa` holds international organisations and EU institutions. Candidates come from
+the global Tranco top 5,000 and from the hosts the country drafts excluded. Each
+row carries the company's `home` country and its `reach` (`europe` or `global`);
+`home` comes from general knowledge and is unverified. Hosts whose primary market
+is one country stay out, US-first sites included: they belong to a future US
+sample. Details in `notes_intl.md`.
 
 ## Changes to the Italian sample
 
@@ -125,7 +129,8 @@ block Tor exits (not tested).
 
 ## Notes files
 
-`notes_it.md`, `notes_fr.md`, `notes_de.md`, `notes_uk.md` and `notes_es.md` are
+`notes_it.md`, `notes_fr.md`, `notes_de.md`, `notes_uk.md`, `notes_es.md` and
+`notes_intl.md` are
 the working notes of each draft, kept as written: borderline sector calls, alias
 resolutions, dropped domains with reasons, clusters kept, sites not observable
 from here. Later revisions are appended under REVISION headings, so the last
