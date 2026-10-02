@@ -1,0 +1,46 @@
+name: Vantage check
+
+# Runs vantage_check.py from a GitHub-hosted runner, i.e. from outside every
+# country in the census. Used to tell national hosts from multi-country ones
+# (see the root-edition test in vantage_check.py). Manual only; the result is
+# downloaded as an artifact.
+on:
+  workflow_dispatch:
+    inputs:
+      domains:
+        description: Space-separated domains to check
+        required: true
+        default: >-
+          benetton.com intimissimi.com tezenis.com calzedonia.com yoox.com
+          luisaviaroma.com kikocosmetics.com terranovastyle.com callmewine.com vino.com
+          lastminute.com ita-airways.com eni.com satispay.com scalapay.com moneyfarm.com
+          casavo.com netsons.com aeroitalia.com luxuryestate.com docsity.com joivy.com
+          carpisa.it pittarello.com bet365.com theguardian.com elpais.com
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: pip install "curl_cffi>=0.13"
+
+      # The input goes through an env var, not ${{ }} inside the script, so a
+      # crafted input cannot inject shell commands.
+      - name: Check roots
+        env:
+          DOMAINS: ${{ inputs.domains }}
+        run: python vantage_check.py $DOMAINS > vantage.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vantage
+          path: vantage.json
