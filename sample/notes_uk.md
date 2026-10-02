@@ -100,3 +100,7 @@ None.
 - asos.com IN (ecommerce): its root serves the UK edition (en-GB) to a visitor from Italy, and the UK is its main market. gousto.co.uk OUT (lowest-ranked ecommerce site).
 - theguardian.com and bet365.com stay on the international list: the Guardian routes foreign visitors to its European or US edition; bet365.com declares 19 country editions.
 - pa tiers: regional = the devolved administrations of Scotland, Wales and Northern Ireland and their bodies, the Greater London Authority, territorial police forces (met.police.uk, gmp.police.uk, psni.police.uk, scotland.police.uk); local = the 10 councils; everything else central, including police.uk and England-only bodies.
+
+# REVISION 3 (UK-first hosts back from the international list)
+- On primary market these are UK, not international: boden.com, riverisland.com, whitestuff.com, newlook.com, mandmdirect.com, tkmaxx.com, lookfantastic.com, selfridges.com (ecommerce); clearpay.com, group.mandg.com, personalinvesting.jpmorgan.com (banking_insurance); premierinn.com, skyscanner.net (the .net is the UK edition), megabus.com (travel_tourism); spectator.com (news); womanandhome.com (media_lifestyle); oddschecker.com (betting_gaming).
+- Out to keep the quotas, lowest Tranco rank in each sector: poundland.co.uk, pricespy.co.uk, homebase.co.uk, dfs.co.uk, lakeland.co.uk, cinch.co.uk, theworks.co.uk, musicmagpie.co.uk; atombank.co.uk, danskebank.co.uk, leedsbuildingsociety.co.uk; citylink.co.uk, crosscountrytrains.co.uk, railcard.co.uk; u.co.uk; bunkered.co.uk; healthlottery.co.uk.
