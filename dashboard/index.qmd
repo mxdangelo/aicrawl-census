@@ -133,11 +133,11 @@ for the other slices.
 
 The opposite move. **llms.txt** (a 2024 convention) is a Markdown file that
 *offers* a curated view of a site to language models — "here is what to read
-about us." Almost nobody uses it: **54 of 543 sites, 9.9%**. And the lead is
+about us." Almost nobody uses it: **58 of 543 sites, 10.7%**. And the lead is
 an unexpected sector — **banking**, where more than 1 in 3 sites publish one,
 and every one is hand-written, not shipped by a plugin.
 
-The chart below counts only those 54 publishers — not the whole sample — and
+The chart below counts only those 58 publishers — not the whole sample — and
 splits each sector's bar by where the file came from: ink for a hand-written
 file, gray for a plugin default. That split is the question this section asks:
 how much of the adoption was a decision rather than a side effect. Sector
