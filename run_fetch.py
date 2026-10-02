@@ -64,10 +64,17 @@ async def main(limit, only_missing):
     if limit:
         rows = rows[:limit]
 
-    for row in rows:
-        con.execute(
-            "INSERT OR IGNORE INTO site_meta (domain, sector) VALUES (?,?)",
-            (row["domain"].strip().lower(), row.get("sector", "").strip()))
+    sites = [(r["domain"].strip().lower(), r.get("sector", "").strip(),
+              (r.get("tier") or "").strip() or None) for r in rows]
+    # Upsert, so a sector or tier changed in the CSV reaches the database.
+    con.executemany(
+        "INSERT INTO site_meta (domain, sector, tier) VALUES (?,?,?) "
+        "ON CONFLICT(domain) DO UPDATE SET sector = excluded.sector, tier = excluded.tier",
+        sites)
+    if not limit:  # a --limit run sees only part of the sample: never prune on it
+        gone = db.prune(con, [d for d, _, _ in sites])
+        if gone:
+            print(f"Pruned {gone} domains no longer in {config.DOMAINS_CSV}.")
     con.commit()
 
     done = set()

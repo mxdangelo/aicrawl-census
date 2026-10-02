@@ -12,6 +12,7 @@ keys. Rebuilt idempotently from staging on every run.
 import sqlite3
 
 import config
+from censuslib import net
 
 DDL = """
 DROP TABLE IF EXISTS dw_fact_policy;
@@ -25,8 +26,10 @@ CREATE TABLE dw_dim_crawler (
 CREATE TABLE dw_dim_domain (
     domain_key INTEGER PRIMARY KEY,
     domain TEXT UNIQUE, sector TEXT,
+    tier TEXT,                    -- pa only: central | regional | local
     cms TEXT, seo_plugin TEXT, cdn TEXT,
-    observable INTEGER,           -- robots.txt reachable (any HTTP answer)
+    observable INTEGER,           -- robots.txt reachable, served by this site
+    unobservable_reason TEXT,     -- blocked | offsite | NULL when observable
     robots_present INTEGER, llms_present INTEGER,
     llms_full_present INTEGER, tdmrep_present INTEGER,
     llms_origin TEXT,             -- hand | generated | none
@@ -42,6 +45,20 @@ CREATE TABLE dw_fact_policy (
 """
 
 
+def _mark_offsite(con):
+    """A robots.txt that ends on another site (a rebrand, or a geo-redirect to
+    the site's Italian edition) was not this domain's own: not observable."""
+    con.execute("UPDATE dw_dim_domain SET unobservable_reason = 'blocked' "
+                "WHERE NOT COALESCE(observable, 0)")
+    rows = con.execute("""SELECT domain, final_url FROM fetches
+                          WHERE resource = 'robots'""").fetchall()
+    offsite = [d for d, url in rows if url and not net.same_site(d, url)]
+    con.executemany("""UPDATE dw_dim_domain
+                       SET observable = 0, robots_present = 0,
+                           unobservable_reason = COALESCE(unobservable_reason, 'offsite')
+                       WHERE domain = ?""", [(d,) for d in offsite])
+
+
 def main():
     con = sqlite3.connect(config.DB_PATH)
     con.executescript(DDL)
@@ -53,11 +70,11 @@ def main():
 
     shielded_in = ",".join(str(s) for s in config.SHIELDED_STATUS)
     con.execute(f"""
-        INSERT INTO dw_dim_domain (domain, sector, cms, seo_plugin, cdn,
+        INSERT INTO dw_dim_domain (domain, sector, tier, cms, seo_plugin, cdn,
             observable, robots_present, llms_present, llms_full_present,
             tdmrep_present, llms_origin, llms_has_instructions,
             ai_template_cluster, ai_cluster_size)
-        SELECT s.domain, s.sector, s.cms, s.seo_plugin, s.cdn,
+        SELECT s.domain, s.sector, s.tier, s.cms, s.seo_plugin, s.cdn,
             (SELECT status NOT IN ({shielded_in}) FROM fetches
               WHERE domain=s.domain AND resource='robots'),
             COALESCE((SELECT present FROM files
@@ -81,10 +98,17 @@ def main():
             (SELECT cluster_id FROM clusters WHERE domain=s.domain),
             (SELECT cluster_size FROM clusters WHERE domain=s.domain)
         FROM site_meta s""")
+    _mark_offsite(con)
 
+    # An unobservable site has no verdict: whatever run_parse derived from a
+    # block page or another site's robots.txt is replaced, so it can never be
+    # counted as "allowed".
     con.execute("""
         INSERT INTO dw_fact_policy
-        SELECT d.domain_key, c.crawler_key, v.mentioned, v.verdict, v.source
+        SELECT d.domain_key, c.crawler_key,
+               CASE WHEN d.observable THEN v.mentioned END,
+               CASE WHEN d.observable THEN v.verdict END,
+               CASE WHEN d.observable THEN v.source ELSE 'unobservable' END
         FROM verdicts v
         JOIN dw_dim_domain d ON d.domain = v.domain
         JOIN dw_dim_crawler c ON c.crawler = v.crawler""")

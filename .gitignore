@@ -3,6 +3,7 @@
 # Everything downstream is rebuilt from it, and the shippable snapshot is
 # census-lite.db (tracked). Keep the heavy DB local.
 census.db
+census.*.db
 
 # --- Python ---
 __pycache__/

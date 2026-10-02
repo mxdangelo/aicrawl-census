@@ -1,7 +1,13 @@
-"""Configuration for the AI-crawler policy census on Italian websites."""
+"""Configuration for the AI-crawler policy census (one country per database)."""
+import os
 
-DB_PATH = "census.db"
-DOMAINS_CSV = "domains.csv"  # columns: domain,sector
+# CENSUS_COUNTRY picks the country: IT keeps the original file names, any other
+# code gets its own database and domain list (census.fr.db, domains.fr.csv).
+COUNTRY = os.environ.get("CENSUS_COUNTRY", "IT").upper()
+SUFFIX = "" if COUNTRY == "IT" else f".{COUNTRY.lower()}"
+
+DB_PATH = f"census{SUFFIX}.db"
+DOMAINS_CSV = f"domains{SUFFIX}.csv"  # columns: domain,sector
 
 # User-agent token -> (operator, declared purpose)
 # Purposes: training = model training; search = live retrieval/citation;
@@ -35,10 +41,12 @@ TIMEOUT = 15.0
 RETRIES = 2
 
 # HTTP outcomes that mean "no usable answer": DNS/connection failure (0),
-# tarpit/queue (202), and the blocks a WAF returns to non-browser TLS
-# (403/429/503). run_refetch.py retries these with browser impersonation;
-# run_dw.py treats them as not observable. Single source to avoid drift.
-SHIELDED_STATUS = (0, 202, 403, 429, 503)
+# tarpit/queue (202), the blocks a WAF returns to non-browser TLS
+# (403/429/503), and 451, a site refusing visitors from our country (UK
+# betting sites do this to non-UK IPs). run_refetch.py retries these with
+# browser impersonation; run_dw.py treats them as not observable. Single
+# source to avoid drift.
+SHIELDED_STATUS = (0, 202, 403, 429, 451, 503)
 USER_AGENT = (
     "Mozilla/5.0 (compatible; AICrawlCensus/0.1; academic research; "
     "+mailto:mxdangelo.seo@gmail.com)"

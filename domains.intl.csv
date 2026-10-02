@@ -1,0 +1,134 @@
+domain,sector,home,reach,surfaced_in,note
+ikea.com,ecommerce,SE,global,FR,ikea.fr redirects to ikea.com/fr
+deichmann.com,ecommerce,DE,europe,DE,one host for all countries
+thetrainline.com,travel_tourism,GB,europe,FR,trainline.fr redirects here
+getyourguide.com,travel_tourism,DE,global,FR,getyourguide.fr redirects to global host
+all.accor.com,travel_tourism,FR,global,FR,Accor group booking host
+lufthansa.com,travel_tourism,DE,global,DE,one host for all countries
+eurowings.com,travel_tourism,DE,europe,DE,one host for all countries
+condor.com,travel_tourism,DE,global,DE,one host for all countries
+komoot.com,travel_tourism,DE,global,DE,one host for all countries
+n26.com,banking_insurance,DE,europe,DE,one host for all countries
+traderepublic.com,banking_insurance,DE,europe,DE,one host for all countries
+sumup.com,banking_insurance,GB,global,FR,sumup.fr redirects to global host
+helvetia.com,banking_insurance,CH,europe,FR,helvetia.fr redirects to global host
+hostinger.com,telco_utilities,LT,global,FR,hostinger.fr redirects to global host
+hetzner.com,telco_utilities,DE,global,DE,one host for all countries
+fritz.com,telco_utilities,DE,europe,DE,avm.de redirects here
+dpd.com,telco_utilities,FR,europe,DE,parcel service; one host with country paths
+suez.com,telco_utilities,FR,global,FR,suez.fr redirects to global host
+deezer.com,media_lifestyle,FR,global,FR,French company; one international host
+dailymotion.com,media_lifestyle,FR,global,FR,French company; one international host
+crunchyroll.com,media_lifestyle,US,global,FR,no French host
+zattoo.com,media_lifestyle,CH,europe,DE,one host for all countries
+yahoo.com,media_lifestyle,US,global,FR,global host; country editions (fr.yahoo.com) are in country samples
+businessinsider.com,news,US,global,FR,businessinsider.fr redirects to global host
+engelvoelkers.com,real_estate,DE,global,DE,one host for all countries
+unibet.com,betting_gaming,SE,global,FR,global host; unibet.fr is in the French sample
+interwetten.com,betting_gaming,AT,europe,DE,global host
+deutsche-boerse.com,banking_insurance,DE,global,DE,boerse-frankfurt.de redirects; global
+netcup.com,telco_utilities,DE,europe,DE,netcup.de redirects; international host
+link.springer.com,publishing_education,DE,global,DE,springer.de redirects; global
+dpa.com,news,DE,global,DE,dpa.de redirects; global
+fraport.com,travel_tourism,DE,global,DE,fraport.de redirects; global corporate
+motel-one.com,travel_tourism,DE,europe,DE,global host
+tibber.com,telco_utilities,NO,europe,DE,global host
+scalable.capital,banking_insurance,DE,europe,DE,pan-European host
+euronews.com,news,FR,global,DE,global host
+lottoland.com,betting_gaming,GI,global,DE,global host
+merkur24.com,betting_gaming,DE,europe,DE,merkur24.de redirects to global social-casino host
+crazybuzzer.com,betting_gaming,DE,europe,DE,crazybuzzer.de redirects; social casino
+benetton.com,ecommerce,IT,global,IT,77 locale editions on one host
+intimissimi.com,ecommerce,IT,global,IT,45 locale editions
+tezenis.com,ecommerce,IT,global,IT,35 locale editions
+calzedonia.com,ecommerce,IT,global,IT,country paths (/it/) on one host
+yoox.com,ecommerce,IT,global,IT,country paths (/it/) on one host
+luisaviaroma.com,ecommerce,IT,global,IT,"7 language editions, worldwide shipping"
+kikocosmetics.com,ecommerce,IT,global,IT,country paths (/it-it/) on one host
+terranovastyle.com,ecommerce,IT,europe,IT,18 locale editions
+lastminute.com,travel_tourism,CH,global,IT,"30 locale editions; group HQ Switzerland, run from Italy (home to verify)"
+ita-airways.com,travel_tourism,IT,global,IT,country/language paths
+eni.com,telco_utilities,IT,global,IT,group corporate host; eniplenitude.com stays in Italy
+moneyfarm.com,banking_insurance,IT,europe,IT,"redirects to /uk/ from Italy; founded in Milan, HQ London (home to verify)"
+luxuryestate.com,real_estate,IT,global,IT,23 country market paths
+docsity.com,publishing_education,IT,global,IT,"country-coded editions (/en/usa/, /es/esp/)"
+joivy.com,real_estate,IT,europe,IT,"dovevivo.com redirects here; IT, ES, PT, FR on one host"
+carpisa.it,ecommerce,IT,europe,IT,"/de-de, /fr-fr, /es-es paths on one host"
+888casino.com,betting_gaming,GI,global,UK,multi-market host
+888sport.com,betting_gaming,GI,global,UK,multi-market host
+bet365.com,betting_gaming,GB,global,UK,"one host, many markets/languages"
+betfair.com,betting_gaming,GB,global,UK,30+ country hreflang
+bloomsbury.com,publishing_education,GB,global,UK,au/ca/gb/in/us editions
+boden.com,ecommerce,GB,global,UK,boden.co.uk 301s here
+boylesports.com,betting_gaming,IE,europe,UK,"Irish-first, IE+UK"
+britishairways.com,travel_tourism,GB,global,UK,country selector
+britishcouncil.org,publishing_education,GB,global,UK,worldwide host
+cambridge.org,publishing_education,GB,global,UK,global publisher host
+clearpay.com,banking_insurance,US,europe,UK,UK/FR/ES/IT on one host
+depop.com,ecommerce,GB,global,UK,country paths
+dhl.com,telco_utilities,DE,global,UK,dhlecommerce.co.uk 301s here
+dk.com,publishing_education,GB,global,UK,in/us editions
+doctify.com,health,GB,europe,UK,country paths /uk/
+easyjet.com,travel_tourism,GB,europe,UK,multi-country language paths
+eurostar.com,travel_tourism,GB,europe,UK,country paths /rw-en
+futurelearn.com,publishing_education,GB,global,UK,global MOOC
+givemesport.com,news,CA,global,UK,"Valnet, global audience"
+global.oup.com,publishing_education,GB,global,UK,oup.co.uk 301s here
+goodhousekeeping.com,media_lifestyle,US,global,UK,goodhousekeeping.co.uk 301s to /uk path
+group.mandg.com,banking_insurance,GB,global,UK,prudential.co.uk 301s to group site
+hellomagazine.com,media_lifestyle,ES,global,UK,us/ca editions on host
+itpro.com,news,GB,global,UK,gb/ie/us editions
+jll.com,real_estate,US,global,UK,jll.co.uk 301s here
+livescorebet.com,betting_gaming,GB,global,UK,gb/ie/ng editions
+lookfantastic.com,ecommerce,GB,global,UK,20 country editions
+loudersound.com,media_lifestyle,GB,global,UK,Future global music site
+mandmdirect.com,ecommerce,GB,europe,UK,country path /gb/en
+megabus.com,travel_tourism,GB,global,UK,ca/gb/us editions
+newlook.com,ecommerce,GB,europe,UK,country path /uk
+oddschecker.com,betting_gaming,GB,global,UK,country paths /it/
+ospreypublishing.com,publishing_education,GB,global,UK,country paths /UK/
+personalinvesting.jpmorgan.com,banking_insurance,US,global,UK,nutmeg.com 301s here
+planetrugby.com,news,GB,global,UK,multi-country hreflang
+pocket-lint.com,news,CA,global,UK,"Valnet, global audience"
+premierinn.com,travel_tourism,GB,europe,UK,/gb/en; German hotels on same host
+riverisland.com,ecommerce,GB,global,UK,multi-country hreflang
+seetickets.com,media_lifestyle,GB,europe,UK,ch/es/fr/nl/pt hreflang
+selfridges.com,ecommerce,GB,global,UK,country paths /IT/en/
+senecalearning.com,publishing_education,GB,global,UK,"/en-gb path, US edition"
+shpock.com,ecommerce,AT,europe,UK,country paths
+skyscanner.net,travel_tourism,GB,global,UK,global metasearch
+spectator.com,news,GB,global,UK,spectator.co.uk 301s here; hreflang gb+us
+squawka.com,news,GB,global,UK,br/nl/us editions
+t3.com,news,GB,global,UK,multi-country hreflang
+taylorandfrancis.com,publishing_education,GB,global,UK,tandf.co.uk 301s here
+teachingenglish.org.uk,publishing_education,GB,global,UK,worldwide audience
+tes.com,publishing_education,GB,global,UK,au/gb editions
+theconversation.com,news,AU,global,UK,edition paths
+theguardian.com,news,GB,global,UK,UK/US/AU/Europe editions on one host
+theweek.com,news,US,global,UK,theweek.co.uk 301s to theweek.com/uk
+thomsonreuters.com,publishing_education,CA,global,UK,thomsonreuters.co.uk 301s here
+timeout.com,media_lifestyle,GB,global,UK,city paths worldwide
+timeshighereducation.com,publishing_education,GB,global,UK,global audience
+tkmaxx.com,ecommerce,US,europe,UK,country selector landing page
+usborne.com,publishing_education,GB,global,UK,country paths /it/
+videoslots.com,betting_gaming,MT,global,UK,multi-market
+virginatlantic.com,travel_tourism,GB,global,UK,country paths /en-EU
+vodafone.com,telco_utilities,GB,global,UK,group host
+whitestuff.com,ecommerce,GB,global,UK,/eu /us paths
+wired.com,news,US,global,UK,wired.co.uk 301s here
+womanandhome.com,media_lifestyle,GB,global,UK,/us edition
+penguinlibros.com,publishing_education,ES,global,ES,country paths /es/ /ar/ /mx/ /co/ /cl/ /pe/ on one host
+centraldereservas.com,travel_tourism,ES,global,ES,country paths /ar /mx /co /cl /pe on one host
+destinia.com,travel_tourism,ES,global,ES,country/language paths /fr/ /pt/ /it/ /de/ /en/ on one host
+iberia.com,travel_tourism,ES,global,ES,"country paths (/it/ served here), 90+ hreflang editions"
+vueling.com,travel_tourism,ES,europe,ES,"country paths, it-it/fr-fr/de-de editions on one host"
+volotea.com,travel_tourism,ES,europe,ES,de-de/fr-fr/it-it/el-gr editions on one host
+smartick.com,publishing_education,ES,global,ES,smartick.es redirects; en-gb/es-mx/es-co editions
+wolterskluwer.com,publishing_education,NL,global,ES,wolterskluwer.es redirects to /es-es/
+elsevier.com,publishing_education,NL,global,ES,elsevier.es redirects to /es-es
+gls-group.com,telco_utilities,NL,europe,ES,gls-spain.es redirects to group host
+nh-hotels.com,travel_tourism,ES,global,ES,nh-hoteles.es redirects to global host
+cervantes.org,publishing_education,ES,global,ES,cervantes.es redirects; Instituto Cervantes centres worldwide
+tirant.com,publishing_education,ES,global,ES,country paths /mx /co /cl on one host
+grupo-sm.com,publishing_education,ES,global,ES,country paths /mx /co /cl /chile on one host
+aireuropa.com,travel_tourism,ES,global,ES,"country/market selector (JS app; paths not visible from probe - per knowledge, unverified)"
