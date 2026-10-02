@@ -11,7 +11,7 @@ import sqlite3
 
 import config
 
-LITE_PATH = "census-lite.db"
+LITE_PATH = f"census-lite{config.SUFFIX}.db"
 
 FETCHES_LITE = """
 CREATE TABLE fetches AS

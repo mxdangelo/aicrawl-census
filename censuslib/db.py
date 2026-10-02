@@ -52,15 +52,36 @@ CREATE TABLE IF NOT EXISTS tdmrep_meta (
 );
 CREATE TABLE IF NOT EXISTS site_meta (
     domain TEXT PRIMARY KEY,
-    sector TEXT, cms TEXT, seo_plugin TEXT, cdn TEXT
+    sector TEXT, cms TEXT, seo_plugin TEXT, cdn TEXT,
+    tier TEXT                                -- pa only: central | regional | local
 );
 """
+
+# Tables that hold one snapshot's rows per domain (clusters is rebuilt each run).
+DOMAIN_TABLES = ("fetches", "files", "verdicts", "robots_meta", "llms_meta",
+                 "tdmrep_meta", "site_meta")
 
 
 def connect(path):
     con = sqlite3.connect(path)
     con.executescript(SCHEMA)
+    cols = {r[1] for r in con.execute("PRAGMA table_info(site_meta)")}
+    if "tier" not in cols:  # databases created before the pa tiers
+        con.execute("ALTER TABLE site_meta ADD COLUMN tier TEXT")
     return con
+
+
+def prune(con, keep):
+    """Delete every row of domains that left the sample, so a removed site's
+    old data cannot reach the next snapshot. Returns how many were removed."""
+    con.execute("CREATE TEMP TABLE keep (domain TEXT PRIMARY KEY)")
+    con.executemany("INSERT OR IGNORE INTO keep VALUES (?)", [(d,) for d in keep])
+    gone = con.execute("SELECT COUNT(*) FROM site_meta "
+                       "WHERE domain NOT IN (SELECT domain FROM keep)").fetchone()[0]
+    for t in DOMAIN_TABLES:
+        con.execute(f"DELETE FROM {t} WHERE domain NOT IN (SELECT domain FROM keep)")
+    con.execute("DROP TABLE keep")
+    return gone
 
 
 def upsert_fetch(con, row):

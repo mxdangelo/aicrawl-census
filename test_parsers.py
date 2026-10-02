@@ -1,5 +1,5 @@
 """Tests for the critical cases. Usage: python test_parsers.py"""
-from censuslib import robots as rb, textfiles as tf
+from censuslib import net, robots as rb, textfiles as tf
 
 FAILS = []
 
@@ -143,5 +143,14 @@ check("tdm meta case/quotes", tf.tdm_meta(
     "<META NAME='TDM-Policy' content='https://x/p'>"), True)
 check("no false positive on prose", tf.tdm_meta(
     "<p>we support tdm-reservation soon</p>"), False)
+
+# --- 17. same site: a robots.txt fetched elsewhere is not this domain's ---
+check("www. is the same site",
+      net.same_site("bet365.es", "https://www.bet365.es/robots.txt"), True)
+check("subdomain is the same site",
+      net.same_site("finecobank.com", "https://it.finecobank.com/robots.txt"), True)
+check("geo-redirect is offsite",
+      net.same_site("pokerstars.de", "https://www.pokerstars.it/robots.txt"), False)
+check("suffix lookalike is offsite", net.same_site("bet.it", "https://notbet.it/"), False)
 
 print(f"\n{'ALL OK' if not FAILS else f'FAILED: {FAILS}'}")
