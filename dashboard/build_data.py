@@ -5,8 +5,9 @@ date and a country, aggregates to small tidy Parquet tables, and accumulates the
 across snapshots. Idempotent: re-run on each data injection (one crawl = one
 snapshot); rows for an existing (snapshot_date, country) are replaced, others kept.
 
-Usage:
-    python dashboard/build_data.py                       # snapshot date from the data, country IT
+Usage (database and country default to CENSUS_COUNTRY, IT if unset):
+    python dashboard/build_data.py                       # snapshot date from the data
+    CENSUS_COUNTRY=FR python dashboard/build_data.py     # census-lite.fr.db, country FR
     python dashboard/build_data.py --snapshot-date 2026-08-01 --country IT
     python dashboard/build_data.py --db path/to/other.db --country FR
 """
@@ -15,12 +16,16 @@ import datetime as dt
 import json
 import pathlib
 import re
+import sys
 
 import duckdb
 
 HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
+import config  # noqa: E402  (repo root, made importable just above)
+
 OUT = HERE / "data"
-DEFAULT_DB = HERE.parent / "census-lite.db"
+DEFAULT_DB = HERE.parent / f"census-lite{config.SUFFIX}.db"
 
 # Tidy fact for slice-and-dice: verdict counts at the finest grain the dashboard
 # filters on. Everything the flagship charts show (blocked share by crawler /
@@ -28,7 +33,7 @@ DEFAULT_DB = HERE.parent / "census-lite.db"
 POLICY_FACTS = """
 SELECT
     ? AS snapshot_date, ? AS country,
-    d.sector, c.crawler, c.operator, c.purpose,
+    d.sector, d.tier, c.crawler, c.operator, c.purpose,
     f.verdict, f.verdict_source AS source,
     COUNT(*) AS n_domains
 FROM src.dw_fact_policy f
@@ -141,6 +146,6 @@ if __name__ == "__main__":
     ap.add_argument("--db", type=pathlib.Path, default=DEFAULT_DB)
     ap.add_argument("--snapshot-date", default=None,
                     help="YYYY-MM-DD; defaults to the latest fetch date in the DB")
-    ap.add_argument("--country", default="IT")
+    ap.add_argument("--country", default=config.COUNTRY)
     a = ap.parse_args()
     build(a.db.resolve(), a.snapshot_date, a.country)

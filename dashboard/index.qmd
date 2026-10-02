@@ -26,19 +26,22 @@ execute:
 ---
 
 ```{python}
-import json
 import pandas as pd
 from IPython.display import HTML
 import charts
 
-meta = json.load(open("data/meta.json", encoding="utf-8"))
-snapshot = meta["snapshots"][-1]
-n_snapshots = len(meta["snapshots"])
+COUNTRY = "IT"
 
-# The parquet tables accumulate every snapshot; these sections read the latest.
-df = pd.read_parquet("data/policy_facts.parquet").query("snapshot_date == @snapshot")
-sig = pd.read_parquet("data/sector_signals.parquet").query("snapshot_date == @snapshot")
-res = pd.read_parquet("data/reserved_domains.parquet").query("snapshot_date == @snapshot")
+# The parquet tables accumulate every country and snapshot; this page reads
+# its own country's latest snapshot.
+facts = pd.read_parquet("data/policy_facts.parquet").query("country == @COUNTRY")
+snapshots = sorted(facts["snapshot_date"].unique())
+snapshot = snapshots[-1]
+n_snapshots = len(snapshots)
+latest = "country == @COUNTRY and snapshot_date == @snapshot"
+df = facts.query("snapshot_date == @snapshot")
+sig = pd.read_parquet("data/sector_signals.parquet").query(latest)
+res = pd.read_parquet("data/reserved_domains.parquet").query(latest)
 
 
 def as_table(t, filename):
@@ -47,8 +50,12 @@ def as_table(t, filename):
     return HTML(charts.table_html(t, filename))
 
 n_domains = int(sig["n_domains"].sum())
-n_sectors = len(meta["sectors"])
-n_crawlers = len(meta["crawlers"])
+# Every site has one row per crawler, so one crawler's rows count the sites.
+one_crawler = df[df["crawler"] == df["crawler"].iloc[0]]
+n_unobserved = int(one_crawler.loc[one_crawler["source"] == "unobservable", "n_domains"].sum())
+n_observed = n_domains - n_unobserved
+n_sectors = df["sector"].nunique()
+n_crawlers = df["crawler"].nunique()
 snapshot_label = (f"snapshot {snapshot}" if n_snapshots == 1
                   else f"snapshot {n_snapshots} · {snapshot}")
 ```
@@ -104,8 +111,10 @@ name a crawler and disallow paths. The chart above counts only the rules that
 name GPTBot; where that happens is uneven, and the press is the outlier.
 
 Crawler by crawler, the picture is the same one seen from the other side. Each
-bar is one crawler and splits into how the 543 sites treat it: **blocked** at
-the root, **partial** (some paths off limits), or **allowed**. Every bar is a
+bar is one crawler and splits into how the `{python} n_observed` sites we could
+read treat it: **blocked** at the root, **partial** (some paths off limits), or
+**allowed**. `{python} n_unobserved` sites blocked our crawler or answered from
+another site; they have no verdict and are left out. Every bar is a
 whole, so the figures inside it are shares of sites, not counts — the counts are
 in the tooltip and the table. Use the menus to slice by sector, or by whether a
 rule *names the crawler* or comes from a catch-all `*`.

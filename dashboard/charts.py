@@ -27,7 +27,15 @@ SECTOR_LABELS = {
     "banking_insurance": "Banking & insurance",
     "travel_tourism": "Travel & tourism",
     "telco_utilities": "Telecoms & utilities",
+    "betting_gaming": "Betting & gaming",
 }
+
+
+def _observed(df):
+    """Policy rows for the sites whose robots.txt we could read. A site that
+    blocked us, or answered from another site, has no verdict and stays out of
+    every share — counting it as 'allowed' would invent a policy."""
+    return df[df["source"] != "unobservable"]
 
 
 def _crawler_order(df):
@@ -47,6 +55,7 @@ def verdict_by_crawler(df, default_source="All"):
     the x-axis goes away entirely and nothing reads as a raw count. Counts
     live in the tooltip. Two dropdowns filter the rows before aggregation —
     the bars re-normalize live."""
+    df = _observed(df)
     sectors = sorted(df["sector"].unique())
     sector_p = alt.param(
         name="sector", value="All",
@@ -113,7 +122,8 @@ def verdict_by_crawler(df, default_source="All"):
 def _block_agg(df, crawler):
     """Per-sector share of sites that *specifically* block the given crawler.
     Shared by the hero chart and its table view."""
-    g = df[df["crawler"] == crawler].copy()
+    g = _observed(df)
+    g = g[g["crawler"] == crawler].copy()
     g["blk"] = (((g["verdict"] == "blocked") & (g["source"] == "specific"))
                 * g["n_domains"])
     agg = g.groupby("sector", as_index=False).agg(
@@ -141,7 +151,7 @@ def block_by_sector(df, crawler="GPTBot", emphasize="news"):
                             alt.value(theme.ACCENT), alt.value(theme.BAR_GRAY)),
         tooltip=[alt.Tooltip("sector_label:N", title="sector"),
                  alt.Tooltip("blk:Q", title=f"blocks {crawler} by name"),
-                 alt.Tooltip("tot:Q", title="sites in sample"),
+                 alt.Tooltip("tot:Q", title="sites observed"),
                  alt.Tooltip("pct:Q", title="share (%)", format=".1f")])
     labels = base.mark_text(align="left", dx=6, color=theme.INK,
                             fontSize=13).encode(text=alt.Text("pct_label:N"))
@@ -313,7 +323,7 @@ def block_table(df, crawler="GPTBot"):
     return pd.DataFrame({
         "Sector": agg["sector_label"],
         f"Blocks {crawler} by name": agg["blk"].astype(int),
-        "Sites": agg["tot"].astype(int),
+        "Sites observed": agg["tot"].astype(int),
         "Share": agg["pct"].map("{:.1f}%".format),
     })
 
@@ -321,6 +331,7 @@ def block_table(df, crawler="GPTBot"):
 def verdict_table(df, source="specific"):
     """Verdict counts per crawler on one rule slice — by default 'specific',
     the rules that name the crawler (the chart's opening view)."""
+    df = _observed(df)
     g = df if source == "All" else df[df["source"] == source]
     t = (g.pivot_table(index=["crawler", "operator"], columns="verdict",
                        values="n_domains", aggfunc="sum", fill_value=0)
