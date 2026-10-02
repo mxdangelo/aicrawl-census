@@ -22,6 +22,8 @@ async def _get(client, url):
     for attempt in range(config.RETRIES + 1):
         try:
             return await client.get(url)
+        except httpx.InvalidURL as e:
+            return e  # a malformed redirect: retrying cannot fix it
         except httpx.HTTPError as e:
             err = e
             if attempt < config.RETRIES:
