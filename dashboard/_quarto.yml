@@ -1,6 +1,30 @@
 project:
   type: website
   output-dir: _site
-  title: "AI Crawler Observatory · Italy"
+  title: "AI Crawler Observatory"
   resources:
     - llms.txt
+
+format:
+  html:
+    theme: [cosmo, theme.scss]
+    page-layout: article
+    toc: false
+    anchor-sections: false
+    include-in-header:
+      text: |
+        <script>
+        // Runs in <head>, before the body paints: a class set from JS after
+        // first paint would flash the light plane on every load.
+        (function () {
+          try {
+            var saved = localStorage.getItem('theme');
+            var dark = saved ? saved === 'dark'
+                             : matchMedia('(prefers-color-scheme: dark)').matches;
+            if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+          } catch (e) {}
+        })();
+        </script>
+execute:
+  echo: false
+  warning: false

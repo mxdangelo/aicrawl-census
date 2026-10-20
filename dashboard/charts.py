@@ -287,11 +287,13 @@ def reserve_stat(sig, reserved):
     by_cat = (reserved["sector"].map(RESERVE_CATEGORY).fillna("Other")
               .value_counts())
     breakdown = " · ".join(f"{cat} {int(c)}" for cat, c in by_cat.items())
+    if "Other" not in by_cat:
+        breakdown += " · every other sector 0"
     return (
         '<div class="statblock">'
         f'<p class="stat-figure"><span class="stat-number">{n}</span>'
         f'<span class="stat-unit">of {total} sites</span></p>'
-        f'<p class="stat-note">{breakdown} · every other sector 0</p>'
+        f'<p class="stat-note">{breakdown}</p>'
         '</div>'
     )
 
@@ -364,3 +366,190 @@ def reserve_table(reserved):
         "Who": r["category"],
         "Signals via": r["channels"],
     })
+
+
+# --- Cross-country comparison ----------------------------------------------
+# The parquet tables carry every country; these builders take the rows of one
+# snapshot per country (the page picks each country's latest) and put them side
+# by side. Shares use observed sites only, like every other chart.
+
+COUNTRY_NAMES = {"IT": "Italy", "FR": "France", "DE": "Germany",
+                 "UK": "United Kingdom", "ES": "Spain"}
+
+
+def _per_country(facts, fn):
+    """Concatenate fn(country_rows) over countries, tagging each with its code."""
+    parts = []
+    for code, rows in facts.groupby("country"):
+        part = fn(rows).copy()
+        part["country"] = code
+        parts.append(part)
+    return pd.concat(parts, ignore_index=True)
+
+
+def country_summary(facts, sig, reserved, crawler="GPTBot"):
+    """One row per country: sample size and the three headline shares.
+
+    Block = sites that name `crawler` and deny it the root, over observed
+    sites. Offer = llms.txt publishers over the whole sample (the page's own
+    definition). Reserve = TDMRep sites over the whole sample; the count rides
+    along because a handful of sites is not a rate to round."""
+    rows = []
+    for code in sorted(facts["country"].unique()):
+        agg = _block_agg(facts[facts["country"] == code], crawler)
+        s = sig[sig["country"] == code]
+        n = int(s["n_domains"].sum())
+        n_res = int((reserved["country"] == code).sum())
+        n_llms = int(s["llms_hand"].sum() + s["llms_generated"].sum())
+        rows.append({
+            "country": code, "name": COUNTRY_NAMES.get(code, code),
+            "sites": n, "observed": int(agg["tot"].sum()),
+            "block_pct": 100 * agg["blk"].sum() / agg["tot"].sum(),
+            "offer_n": n_llms, "offer_pct": 100 * n_llms / n,
+            "reserve_n": n_res, "reserve_pct": 100 * n_res / n,
+        })
+    return pd.DataFrame(rows)
+
+
+def compare_signals(summary, crawler="GPTBot"):
+    """The three signals, one small panel each, countries on the same rows.
+
+    Same axis within a panel, free across panels: the three shares differ by an
+    order of magnitude. Each bar carries its value; reserve also names the
+    count, since 1 site and 53 sites need different words."""
+    long = pd.concat([
+        summary.assign(signal=f"Block · name {crawler}", pct=summary["block_pct"],
+                       label=summary["block_pct"].map("{:.0f}%".format)),
+        summary.assign(signal="Offer · publish llms.txt", pct=summary["offer_pct"],
+                       label=summary["offer_pct"].map("{:.1f}%".format)),
+        summary.assign(signal="Reserve · TDMRep", pct=summary["reserve_pct"],
+                       label=summary.apply(
+                           lambda r: f"{r.reserve_pct:.1f}% ({r.reserve_n})", axis=1)),
+    ], ignore_index=True)
+    order = ["Block · name " + crawler, "Offer · publish llms.txt",
+             "Reserve · TDMRep"]
+    y = alt.Y("name:N", title=None, sort=summary.sort_values(
+        "block_pct", ascending=False)["name"].tolist(),
+        axis=alt.Axis(domain=False, ticks=False))
+    base = alt.Chart(long).encode(
+        y=y,
+        x=alt.X("pct:Q", axis=None, scale=alt.Scale(domainMin=0, nice=False)))
+    bars = base.mark_bar(cornerRadiusEnd=3, height=16, color=theme.BAR_GRAY).encode(
+        tooltip=[alt.Tooltip("name:N", title="country"),
+                 alt.Tooltip("sites:Q", title="sites in sample"),
+                 alt.Tooltip("pct:Q", title="share (%)", format=".2f")])
+    text = base.mark_text(align="left", dx=5, color=theme.INK, fontSize=12).encode(
+        text="label:N")
+    # Headroom for the value labels: an invisible mark 1.45x the panel's max
+    # stretches that panel's own scale (the panels' x scales are independent).
+    long["room"] = long.groupby("signal")["pct"].transform("max") * 1.45
+    room = alt.Chart(long).mark_point(opacity=0).encode(
+        y=y, x=alt.X("room:Q", axis=None))
+    panels = (bars + text + room).properties(width=200, height=170).facet(
+        column=alt.Column("signal:N", sort=order, title=None,
+                          header=alt.Header(labelFontSize=13, labelColor=theme.INK,
+                                            labelAnchor="start")))
+    return theme.themed(panels.resolve_scale(x="independent"))
+
+
+def compare_sector_heatmap(facts, crawler="GPTBot"):
+    """Sector × country grid of the share of sites naming `crawler` and denying
+    it the root. One mark per cell, value printed in it; empty cell = no
+    observed site in that sector. Rows ordered by the all-country mean so the
+    press sits on top wherever it leads."""
+    cells = _per_country(facts, lambda rows: _block_agg(rows, crawler))
+    cells["name"] = cells["country"].map(COUNTRY_NAMES).fillna(cells["country"])
+    cells["label"] = cells["pct"].round().astype(int).astype(str) + "%"
+    sector_order = (cells.groupby("sector_label")["pct"].mean()
+                    .sort_values(ascending=False).index.tolist())
+    country_order = (cells.groupby("name")["pct"].mean()
+                     .sort_values(ascending=False).index.tolist())
+    base = alt.Chart(cells).encode(
+        x=alt.X("name:N", sort=country_order, title=None,
+                axis=alt.Axis(orient="top", labelAngle=0, domain=False, ticks=False)),
+        y=alt.Y("sector_label:N", sort=sector_order, title=None,
+                axis=alt.Axis(domain=False, ticks=False)))
+    rect = base.mark_rect(stroke="transparent", strokeWidth=2).encode(
+        color=alt.Color("pct:Q", legend=None,
+                        scale=alt.Scale(range=theme.SEQ, domain=[0, 70], clamp=True)),
+        tooltip=[alt.Tooltip("name:N", title="country"),
+                 alt.Tooltip("sector_label:N", title="sector"),
+                 alt.Tooltip("blk:Q", title=f"block {crawler} by name"),
+                 alt.Tooltip("tot:Q", title="sites observed"),
+                 alt.Tooltip("pct:Q", title="share (%)", format=".1f")])
+    text = base.mark_text(fontSize=13).encode(
+        text="label:N",
+        color=alt.condition("datum.pct > 38", alt.value(theme.PAPER),
+                            alt.value(theme.ACCENT)))
+    return theme.themed((rect + text).properties(width="container", height=400))
+
+
+def compare_table(summary, crawler="GPTBot"):
+    return pd.DataFrame({
+        "Country": summary["name"],
+        "Sites in sample": summary["sites"],
+        "Sites observed": summary["observed"],
+        f"Block {crawler} by name": summary["block_pct"].map("{:.1f}%".format),
+        "Publish llms.txt": summary["offer_n"].astype(str) + " ("
+                            + summary["offer_pct"].map("{:.1f}%".format) + ")",
+        "Reserve (TDMRep)": summary["reserve_n"].astype(str) + " ("
+                            + summary["reserve_pct"].map("{:.1f}%".format) + ")",
+    })
+
+
+def sector_compare_table(facts, crawler="GPTBot"):
+    """Heatmap data as a countries-across table (accessibility twin)."""
+    cells = _per_country(facts, lambda rows: _block_agg(rows, crawler))
+    cells["name"] = cells["country"].map(COUNTRY_NAMES).fillna(cells["country"])
+    t = cells.pivot(index="sector_label", columns="name", values="pct")
+    t = t.loc[t.mean(axis=1).sort_values(ascending=False).index]
+    t = t[t.mean().sort_values(ascending=False).index]
+    t = t.map(lambda v: "" if pd.isna(v) else f"{v:.1f}%")
+    t.insert(0, "Sector", t.index)
+    t.columns.name = None
+    return t.reset_index(drop=True)
+
+
+# --- Country pages: computed prose and navigation --------------------------
+
+COUNTRY_ADJ = {"IT": "Italian", "FR": "French", "DE": "German",
+               "UK": "British", "ES": "Spanish"}
+# Page file per country; Italy keeps index.html, the original address.
+COUNTRY_PAGES = {"IT": "index.html", "FR": "fr.html", "DE": "de.html",
+                 "UK": "uk.html", "ES": "es.html"}
+MIN_SECTOR_SITES = 15   # a sector smaller than this can't carry a "lead" claim
+
+
+def top_block_sector(df, crawler="GPTBot"):
+    """The sector with the highest share of sites naming `crawler` and denying
+    it the root, among sectors with enough observed sites to rank."""
+    agg = _block_agg(df, crawler)
+    agg = agg[agg["tot"] >= MIN_SECTOR_SITES]
+    return agg.sort_values("pct", ascending=False).iloc[0]
+
+
+def top_offer_sector(sig):
+    """One sentence on the sector where llms.txt is most common, with how much
+    of it was written by hand. Computed so it can't state another country's
+    finding."""
+    t = sig[sig["n_domains"] >= MIN_SECTOR_SITES].copy()
+    t["pub"] = t["llms_hand"] + t["llms_generated"]
+    t["share"] = t["pub"] / t["n_domains"]
+    row = t.sort_values(["share", "llms_hand"], ascending=False).iloc[0]
+    label = SECTOR_LABELS.get(row["sector"], row["sector"]).lower()
+    hand = (f"all {int(row['llms_hand'])} hand-written"
+            if row["llms_generated"] == 0
+            else f"{int(row['llms_hand'])} of them hand-written")
+    return (f"The lead is {label}: {int(row['pub'])} of {int(row['n_domains'])} "
+            f"sites ({100 * row['share']:.0f}%), {hand}.")
+
+
+def country_nav(current):
+    """One link per country page plus the comparison. `current` is a country
+    code, or "compare"."""
+    items = [(c, COUNTRY_NAMES[c], COUNTRY_PAGES[c]) for c in COUNTRY_PAGES]
+    items.append(("compare", "Compare", "compare.html"))
+    links = "".join(
+        f'<a href="{href}"' + (' aria-current="page"' if code == current else "")
+        + f'>{label}</a>' for code, label, href in items)
+    return f'<nav class="country-nav" aria-label="Countries">{links}</nav>'

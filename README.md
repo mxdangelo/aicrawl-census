@@ -62,9 +62,12 @@ Output: `census.db` (SQLite). Main tables:
 
 Dashboard: a data-driven observatory (Altair + Quarto), **live at
 [mxdangelo.github.io/aicrawl-census](https://mxdangelo.github.io/aicrawl-census/)**
-— block / offer / reserve across Italian sectors, built to scale over periodic
-snapshots (temporal dimension) and multiple countries. Build locally:
-`python dashboard/build_data.py` then `quarto render dashboard/index.qmd`.
+— block / offer / reserve across sectors. One page per country (`index.qmd`
+is Italy, then `fr`, `de`, `uk`, `es`, all wrapping the shared
+`_country.qmd`) plus `compare.qmd`, which sets the five countries side by
+side. Prose that states a finding is computed from the data. Build locally:
+`CENSUS_COUNTRY=FR python dashboard/build_data.py` for each country, then
+`quarto render dashboard`.
 
 ## Design decisions
 

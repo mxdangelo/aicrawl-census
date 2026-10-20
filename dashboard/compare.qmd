@@ -1,0 +1,146 @@
+---
+title: "AI Crawler Observatory · Compared"
+---
+
+```{python}
+import pandas as pd
+from IPython.display import HTML
+import charts
+
+def latest_rows(path):
+    """Each country's latest snapshot — countries were not all crawled on the
+    same dates, so 'latest' is picked per country."""
+    t = pd.read_parquet(path)
+    last = t.groupby("country")["snapshot_date"].transform("max")
+    return t[t["snapshot_date"] == last]
+
+facts = latest_rows("data/policy_facts.parquet")
+sig = latest_rows("data/sector_signals.parquet")
+res = latest_rows("data/reserved_domains.parquet")
+summary = charts.country_summary(facts, sig, res)
+snapshots = sorted(facts["snapshot_date"].unique())
+snapshot_label = (f"snapshot {snapshots[0]}" if len(snapshots) == 1
+                  else f"snapshots {snapshots[0]} to {snapshots[-1]}")
+n_countries = len(summary)
+n_sites = int(summary["sites"].sum())
+n_sectors = facts["sector"].nunique()
+n_crawlers = facts["crawler"].nunique()
+
+
+def as_table(t, filename):
+    return HTML(charts.table_html(t, filename))
+
+# Prose that states a finding is computed from the data.
+top_by_country = {c: charts.top_block_sector(g)["sector"]
+                  for c, g in facts.groupby("country")}
+press_leads = all(s == "news" for s in top_by_country.values())
+lead_line = ("The press blocks most, in every country."
+             if press_leads else "Which sector blocks most differs by country.")
+hi = summary.sort_values("block_pct", ascending=False).iloc[0]
+lo = summary.sort_values("block_pct").iloc[0]
+fr_res = summary.sort_values("reserve_pct", ascending=False).iloc[0]
+block_line = (f"On GPTBot, {hi['name']} blocks by name at {hi['block_pct']:.1f}% "
+              f"of observed sites, {lo['name']} at {lo['block_pct']:.1f}%.")
+reserve_line = (f"TDMRep reservations are rare everywhere except {fr_res['name']}: "
+                f"{int(fr_res['reserve_n'])} of {int(fr_res['sites'])} sites "
+                f"({fr_res['reserve_pct']:.1f}%).")
+```
+
+::: {.kicker}
+AI Crawler Observatory · Compared
+:::
+
+```{python}
+HTML(charts.country_nav("compare"))
+```
+
+::: {.proposition}
+`{python} n_countries` countries, one method: what websites tell AI crawlers,
+side by side.
+:::
+
+::: {.lead}
+`{python} lead_line`
+:::
+
+::: {.panel-tabset}
+
+### Chart
+
+```{python}
+charts.compare_sector_heatmap(facts)
+```
+
+### Table
+
+```{python}
+as_table(charts.sector_compare_table(facts), "block-by-sector-and-country.csv")
+```
+
+:::
+
+::: {.fold-caption}
+Share of each sector's observed sites that block GPTBot *by name*, by country.
+:::
+
+::: {.dateline}
+[`{python} n_sites` domains · `{python} n_countries` countries · `{python} n_sectors` sectors · `{python} n_crawlers` crawlers · `{python} snapshot_label` · [Read before comparing →](#read-before-comparing)]{.dateline-meta}
+{{< include _toggle.qmd >}}
+:::
+
+## The three signals {#signals}
+
+Block, offer and reserve for each country, on its latest snapshot. `{python} block_line`
+`{python} reserve_line`
+
+Shares use different bases on purpose. **Block** is the share of *observed*
+sites that name GPTBot and deny it the root; **offer** and **reserve** are
+shares of the whole sample. Reserve carries its count, because a single site
+and dozens of sites call for different words.
+
+::: {.panel-tabset}
+
+### Chart
+
+```{python}
+charts.compare_signals(summary)
+```
+
+### Table
+
+```{python}
+as_table(charts.compare_table(summary), "signals-by-country.csv")
+```
+
+:::
+
+## Read before comparing {#read-before-comparing}
+
+**One vantage.** Every fetch ran from one Italian address on the national
+research network. A site that answers differently by visitor country, or blocks
+non-browser clients, comes back as *not observable* and is left out of every
+share. That removes more sites outside Italy than inside it, and it removes the
+sites that guard themselves hardest. A block share here is a floor for those
+sites, not an estimate. `{python} int(summary["sites"].sum() - summary["observed"].sum())` of
+`{python} n_sites` sites are unobservable in total; the table gives each
+country's sample and observed counts.
+
+**Different sample sizes.** Each country's sample scales with the number of its
+domains in the Tranco top-1M list, dampened by a square root, and takes Italy's
+sector proportions. Small sectors in the smaller countries rest on few sites:
+the heatmap prints a share, the tooltip prints the count behind it. Read a cell
+with ten sites as a rough indication.
+
+**Different snapshots.** Each country is read at its latest snapshot, and the
+dateline gives the range. Italy's earlier snapshots used a smaller sample, so a
+trend there has to be computed on the domains present in every snapshot.
+
+**Descriptive only.** The figures report what sites declare. They do not say why
+a country differs, and they do not measure crawler behaviour.
+
+Sampling rules and per-country notes:
+[`sample/METHOD.md`](https://github.com/mxdangelo/aicrawl-census/blob/main/sample/METHOD.md).
+Pipeline and data:
+[github.com/mxdangelo/aicrawl-census](https://github.com/mxdangelo/aicrawl-census).
+
+{{< include _scripts.qmd >}}
