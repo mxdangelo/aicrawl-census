@@ -7,16 +7,9 @@ import pandas as pd
 from IPython.display import HTML
 import charts
 
-def latest_rows(path):
-    """Each country's latest snapshot — countries were not all crawled on the
-    same dates, so 'latest' is picked per country."""
-    t = pd.read_parquet(path)
-    last = t.groupby("country")["snapshot_date"].transform("max")
-    return t[t["snapshot_date"] == last]
-
-facts = latest_rows("data/policy_facts.parquet")
-sig = latest_rows("data/sector_signals.parquet")
-res = latest_rows("data/reserved_domains.parquet")
+facts = charts.latest_rows("data/policy_facts.parquet")
+sig = charts.latest_rows("data/sector_signals.parquet")
+res = charts.latest_rows("data/reserved_domains.parquet")
 summary = charts.country_summary(facts, sig, res)
 snapshots = sorted(facts["snapshot_date"].unique())
 snapshot_label = (f"snapshot {snapshots[0]}" if len(snapshots) == 1
@@ -38,12 +31,18 @@ lead_line = ("The press blocks most, in every country."
              if press_leads else "Which sector blocks most differs by country.")
 hi = summary.sort_values("block_pct", ascending=False).iloc[0]
 lo = summary.sort_values("block_pct").iloc[0]
-fr_res = summary.sort_values("reserve_pct", ascending=False).iloc[0]
+by_res = summary.sort_values("reserve_n", ascending=False)
+top_res, second_res = by_res.iloc[0], by_res.iloc[1]
+by_res = summary.sort_values("reserve_n", ascending=False)
+top_res, second_res = by_res.iloc[0], by_res.iloc[1]
 block_line = (f"On GPTBot, {hi['name']} blocks by name at {hi['block_pct']:.1f}% "
               f"of observed sites, {lo['name']} at {lo['block_pct']:.1f}%.")
-reserve_line = (f"TDMRep reservations are rare everywhere except {fr_res['name']}: "
-                f"{int(fr_res['reserve_n'])} of {int(fr_res['sites'])} sites "
-                f"({fr_res['reserve_pct']:.1f}%).")
+reserve_line = (f"TDMRep reservations are rare everywhere except {top_res['name']}: "
+                f"{int(top_res['reserve_n'])} of {int(top_res['sites'])} sites "
+                f"({top_res['reserve_pct']:.1f}%)."
+                if top_res["reserve_n"] >= 2 * second_res["reserve_n"] else
+                f"TDMRep reservations run from {int(by_res.iloc[-1]['reserve_n'])} "
+                f"to {int(top_res['reserve_n'])} sites per country.")
 ```
 
 ::: {.kicker}
@@ -80,7 +79,7 @@ as_table(charts.sector_compare_table(facts), "block-by-sector-and-country.csv")
 :::
 
 ::: {.fold-caption}
-Share of each sector's observed sites that block GPTBot *by name*, by country.
+Share of each sector's observed sites that block GPTBot *by name*, by country. Countries in a fixed order (Italy, then alphabetical); sectors by their average share.
 :::
 
 ::: {.dateline}

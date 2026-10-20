@@ -374,7 +374,18 @@ def reserve_table(reserved):
 # by side. Shares use observed sites only, like every other chart.
 
 COUNTRY_NAMES = {"IT": "Italy", "FR": "France", "DE": "Germany",
-                 "UK": "United Kingdom", "ES": "Spain"}
+                 "ES": "Spain", "UK": "United Kingdom"}
+# One order, used by the nav, the heatmap columns, the panels and every table:
+# Italy first (the original census), then the others alphabetically by name.
+COUNTRY_ORDER = list(COUNTRY_NAMES)
+
+
+def latest_rows(path):
+    """Each country's latest snapshot — countries were not all crawled on the
+    same dates, so 'latest' is picked per country."""
+    t = pd.read_parquet(path)
+    last = t.groupby("country")["snapshot_date"].transform("max")
+    return t[t["snapshot_date"] == last]
 
 
 def _per_country(facts, fn):
@@ -395,7 +406,7 @@ def country_summary(facts, sig, reserved, crawler="GPTBot"):
     definition). Reserve = TDMRep sites over the whole sample; the count rides
     along because a handful of sites is not a rate to round."""
     rows = []
-    for code in sorted(facts["country"].unique()):
+    for code in [c for c in COUNTRY_ORDER if c in set(facts["country"])]:
         agg = _block_agg(facts[facts["country"] == code], crawler)
         s = sig[sig["country"] == code]
         n = int(s["n_domains"].sum())
@@ -428,8 +439,7 @@ def compare_signals(summary, crawler="GPTBot"):
     ], ignore_index=True)
     order = ["Block · name " + crawler, "Offer · publish llms.txt",
              "Reserve · TDMRep"]
-    y = alt.Y("name:N", title=None, sort=summary.sort_values(
-        "block_pct", ascending=False)["name"].tolist(),
+    y = alt.Y("name:N", title=None, sort=summary["name"].tolist(),
         axis=alt.Axis(domain=False, ticks=False))
     base = alt.Chart(long).encode(
         y=y,
@@ -462,8 +472,8 @@ def compare_sector_heatmap(facts, crawler="GPTBot"):
     cells["label"] = cells["pct"].round().astype(int).astype(str) + "%"
     sector_order = (cells.groupby("sector_label")["pct"].mean()
                     .sort_values(ascending=False).index.tolist())
-    country_order = (cells.groupby("name")["pct"].mean()
-                     .sort_values(ascending=False).index.tolist())
+    country_order = [COUNTRY_NAMES[c] for c in COUNTRY_ORDER
+                     if c in set(cells["country"])]
     base = alt.Chart(cells).encode(
         x=alt.X("name:N", sort=country_order, title=None,
                 axis=alt.Axis(orient="top", labelAngle=0, domain=False, ticks=False)),
@@ -503,7 +513,7 @@ def sector_compare_table(facts, crawler="GPTBot"):
     cells["name"] = cells["country"].map(COUNTRY_NAMES).fillna(cells["country"])
     t = cells.pivot(index="sector_label", columns="name", values="pct")
     t = t.loc[t.mean(axis=1).sort_values(ascending=False).index]
-    t = t[t.mean().sort_values(ascending=False).index]
+    t = t[[COUNTRY_NAMES[c] for c in COUNTRY_ORDER if COUNTRY_NAMES[c] in t.columns]]
     t = t.map(lambda v: "" if pd.isna(v) else f"{v:.1f}%")
     t.insert(0, "Sector", t.index)
     t.columns.name = None
@@ -516,7 +526,7 @@ COUNTRY_ADJ = {"IT": "Italian", "FR": "French", "DE": "German",
                "UK": "British", "ES": "Spanish"}
 # Page file per country; Italy keeps index.html, the original address.
 COUNTRY_PAGES = {"IT": "index.html", "FR": "fr.html", "DE": "de.html",
-                 "UK": "uk.html", "ES": "es.html"}
+                 "ES": "es.html", "UK": "uk.html"}
 MIN_SECTOR_SITES = 15   # a sector smaller than this can't carry a "lead" claim
 
 
@@ -547,9 +557,147 @@ def top_offer_sector(sig):
 def country_nav(current):
     """One link per country page plus the comparison. `current` is a country
     code, or "compare"."""
-    items = [(c, COUNTRY_NAMES[c], COUNTRY_PAGES[c]) for c in COUNTRY_PAGES]
+    items = [(c, COUNTRY_NAMES[c], COUNTRY_PAGES[c]) for c in COUNTRY_ORDER]
     items.append(("compare", "Compare", "compare.html"))
     links = "".join(
         f'<a href="{href}"' + (' aria-current="page"' if code == current else "")
         + f'>{label}</a>' for code, label, href in items)
     return f'<nav class="country-nav" aria-label="Countries">{links}</nav>'
+
+
+# --- Story heroes: one emphasis-bar chart per kind of finding ---------------
+# A country page opens with the finding that sets it apart (see stories.py);
+# the chart under the headline has to show that finding. All of them share the
+# look of block_by_sector: the story sector in ink, the rest gray, every bar
+# labelled, no axis.
+
+
+def _pct_label(v):
+    return f"{v:.0f}%" if v >= 1 or v == 0 else f"{v:.1f}%"
+
+
+def _share_bars(agg, emphasize, tooltip):
+    """Emphasis bars for a frame with sector, sector_label and pct."""
+    agg = agg.copy()
+    agg["pct_label"] = agg["pct"].map(_pct_label)
+    base = alt.Chart(agg).encode(
+        y=alt.Y("sector_label:N", sort="-x", title=None,
+                axis=alt.Axis(domain=False, ticks=False)),
+        x=alt.X("pct:Q", axis=None,
+                scale=alt.Scale(domain=[0, max(agg["pct"].max(), 1) * 1.12])))
+    bars = base.mark_bar(cornerRadiusEnd=4, height=20).encode(
+        color=alt.condition(f"datum.sector === '{emphasize}'",
+                            alt.value(theme.ACCENT), alt.value(theme.BAR_GRAY)),
+        tooltip=tooltip)
+    labels = base.mark_text(align="left", dx=6, color=theme.INK,
+                            fontSize=13).encode(text=alt.Text("pct_label:N"))
+    return theme.themed((bars + labels).properties(width="container", height=360))
+
+
+def _with_labels(agg):
+    agg = agg.copy()
+    agg["sector_label"] = agg["sector"].map(SECTOR_LABELS).fillna(agg["sector"])
+    return agg
+
+
+def _unobserved_agg(df, crawler="GPTBot"):
+    """Per sector: sites whose robots.txt we could not read, over the sample."""
+    g = df[df["crawler"] == crawler].copy()
+    g["un"] = (g["source"] == "unobservable") * g["n_domains"]
+    agg = g.groupby("sector", as_index=False).agg(
+        un=("un", "sum"), tot=("n_domains", "sum"))
+    agg["pct"] = 100 * agg["un"] / agg["tot"]
+    return _with_labels(agg)
+
+
+def _reserve_agg(sig, reserved):
+    agg = sig[["sector", "n_domains"]].rename(columns={"n_domains": "tot"}).copy()
+    agg["n"] = agg["sector"].map(reserved["sector"].value_counts()).fillna(0)
+    agg["pct"] = 100 * agg["n"] / agg["tot"]
+    return _with_labels(agg)
+
+
+def _offer_agg(sig):
+    agg = sig[["sector", "n_domains", "llms_hand", "llms_generated"]].copy()
+    agg["tot"] = agg["n_domains"]
+    agg["n"] = agg["llms_hand"] + agg["llms_generated"]
+    agg["pct"] = 100 * agg["n"] / agg["tot"]
+    return _with_labels(agg)
+
+
+def unobserved_by_sector(df, emphasize="betting_gaming"):
+    return _share_bars(_unobserved_agg(df), emphasize, [
+        alt.Tooltip("sector_label:N", title="sector"),
+        alt.Tooltip("un:Q", title="robots.txt out of reach"),
+        alt.Tooltip("tot:Q", title="sites in sample"),
+        alt.Tooltip("pct:Q", title="share (%)", format=".1f")])
+
+
+def reserve_by_sector(sig, reserved, emphasize="news"):
+    return _share_bars(_reserve_agg(sig, reserved), emphasize, [
+        alt.Tooltip("sector_label:N", title="sector"),
+        alt.Tooltip("n:Q", title="sites reserving"),
+        alt.Tooltip("tot:Q", title="sites in sample"),
+        alt.Tooltip("pct:Q", title="share (%)", format=".1f")])
+
+
+def offer_share_by_sector(sig, emphasize="banking_insurance"):
+    return _share_bars(_offer_agg(sig), emphasize, [
+        alt.Tooltip("sector_label:N", title="sector"),
+        alt.Tooltip("n:Q", title="publish llms.txt"),
+        alt.Tooltip("tot:Q", title="sites in sample"),
+        alt.Tooltip("pct:Q", title="share (%)", format=".1f")])
+
+
+def _share_table(agg, count_col, count_title, tot_title):
+    agg = agg.sort_values("pct", ascending=False)
+    return pd.DataFrame({
+        "Sector": agg["sector_label"],
+        count_title: agg[count_col].astype(int),
+        tot_title: agg["tot"].astype(int),
+        "Share": agg["pct"].map("{:.1f}%".format),
+    })
+
+
+def unobserved_table(df):
+    return _share_table(_unobserved_agg(df), "un", "Robots.txt out of reach",
+                        "Sites in sample")
+
+
+def reserve_share_table(sig, reserved):
+    return _share_table(_reserve_agg(sig, reserved), "n", "Sites reserving",
+                        "Sites in sample")
+
+
+def offer_share_table(sig):
+    return _share_table(_offer_agg(sig), "n", "Publish llms.txt", "Sites in sample")
+
+
+# --- Reserve list: named table when short, summary when long ----------------
+NAMED_LIST_MAX = 15     # above this a list of names is a wall, not a finding
+
+
+def reserve_summary_table(reserved):
+    """Reserving sites by who they are and how they signal. A site can use
+    several channels, so the channel columns can add to more than the total."""
+    r = reserved.copy()
+    r["Who"] = r["sector"].map(RESERVE_CATEGORY).fillna("Other")
+    for col, key in [("Well-known file", ".well-known file"),
+                     ("HTTP header", "HTTP header"), ("Meta tag", "meta tag")]:
+        r[col] = r["channels"].str.contains(key, regex=False).astype(int)
+    t = r.groupby("Who").agg(**{"Sites": ("domain", "size"),
+                                "Well-known file": ("Well-known file", "sum"),
+                                "HTTP header": ("HTTP header", "sum"),
+                                "Meta tag": ("Meta tag", "sum")})
+    t = t.sort_values("Sites", ascending=False).reset_index()
+    t.loc[len(t)] = ["All"] + t.drop(columns="Who").sum().tolist()
+    return t
+
+
+def csv_link(t, filename, label):
+    """Just the download, for data too long to print."""
+    csv = t.to_csv(index=False)
+    href = ("data:text/csv;charset=utf-8;base64,"
+            + base64.b64encode(csv.encode("utf-8")).decode("ascii"))
+    return (f'<div class="table-actions"><a class="download-csv" '
+            f'href="{href}" download="{filename}">{label}</a></div>')

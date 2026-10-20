@@ -3,6 +3,7 @@
 import pandas as pd
 from IPython.display import HTML
 import charts
+import stories
 
 # COUNTRY is set by the page that includes this body (index, fr, de, uk, es).
 NAME = charts.COUNTRY_NAMES[COUNTRY]
@@ -38,13 +39,17 @@ snapshot_label = (f"snapshot {snapshot}" if n_snapshots == 1
                   else f"snapshot {n_snapshots} · {snapshot}")
 
 # Prose that states a finding is computed from the data, so a country page
-# can't carry another country's sentence.
+# can't carry another country's sentence. The headline is that country's own
+# finding (stories.py), chosen against the latest rows of all five.
+all_facts = charts.latest_rows("data/policy_facts.parquet")
+all_sig = charts.latest_rows("data/sector_signals.parquet")
+all_res = charts.latest_rows("data/reserved_domains.parquet")
+story = stories.choose(COUNTRY, all_facts, all_sig, all_res)
+hero_chart, hero_table, hero_file, hero_caption = stories.hero(story, df, sig, res)
 top = charts.top_block_sector(df)
 top_name = "the press" if top["sector"] == "news" else top["sector_label"].lower()
-lead_line = (f"Resistance to AI crawlers is concentrated in {top_name}."
-             if top["sector"] == "news"
-             else f"Resistance to AI crawlers is highest in {top_name}.")
 offer_lead = charts.top_offer_sector(sig)
+n_reserved = len(res)
 ```
 
 ::: {.kicker}
@@ -60,27 +65,31 @@ A recurring census of what `{python} ADJ` websites tell AI crawlers.
 :::
 
 ::: {.lead}
-`{python} lead_line`
+`{python} story["headline"]`
 :::
+
+```{python}
+HTML(f'<p class="dek">{story["dek"]}</p>' if story["dek"] else "")
+```
 
 ::: {.panel-tabset}
 
 ### Chart
 
 ```{python}
-charts.block_by_sector(df)
+hero_chart
 ```
 
 ### Table
 
 ```{python}
-as_table(charts.block_table(df), "block-by-sector.csv")
+as_table(hero_table, hero_file)
 ```
 
 :::
 
 ::: {.fold-caption}
-Share of each sector's sites that block GPTBot *by name*.
+`{python} hero_caption`
 :::
 
 ::: {.dateline}
@@ -166,10 +175,18 @@ the only one of the three signals with legal weight in the EU.
 HTML(charts.reserve_stat(sig, res))
 ```
 
-Every site that reserves, and the channel it signals through:
-
 ```{python}
-as_table(charts.reserve_table(res), "tdmrep-sites.csv")
+if n_reserved <= charts.NAMED_LIST_MAX:
+    display(HTML("<p>Every site that reserves, and the channel it signals through:</p>"))
+    display(as_table(charts.reserve_table(res), "tdmrep-sites.csv"))
+else:
+    display(HTML(f"<p>{n_reserved} sites reserve: too many to list here. "
+                 "By who they are and how they signal (a site can use more than "
+                 "one channel):</p>"))
+    display(HTML(charts.reserve_summary_table(res).to_html(
+        index=False, classes="table table-sm", border=0)))
+    display(HTML(charts.csv_link(charts.reserve_table(res), "tdmrep-sites.csv",
+                                 f"Download all {n_reserved} sites (CSV)")))
 ```
 
 ## Method {#method}
