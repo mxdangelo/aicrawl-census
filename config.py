@@ -44,8 +44,9 @@ RETRIES = 2
 # tarpit/queue (202), the blocks a WAF returns to non-browser TLS
 # (403/429/503), and 451, a site refusing visitors from our country (UK
 # betting sites do this to non-UK IPs). run_refetch.py retries these with
-# browser impersonation; run_dw.py treats them as not observable. Single
-# source to avoid drift.
+# browser impersonation; run_dw.py treats them as not observable (reason
+# "blocked"), and any other 5xx too (reason "server_error"). Single source
+# to avoid drift.
 SHIELDED_STATUS = (0, 202, 403, 429, 451, 503)
 USER_AGENT = (
     "Mozilla/5.0 (compatible; AICrawlCensus/0.1; academic research; "

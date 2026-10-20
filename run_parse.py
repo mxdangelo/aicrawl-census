@@ -11,7 +11,7 @@ from censuslib import db, fingerprint, robots as rb, textfiles as tf
 
 
 def decode(body: bytes) -> str:
-    for enc in ("utf-8", "latin-1"):
+    for enc in ("utf-8-sig", "latin-1"):  # -sig: drop a leading BOM
         try:
             return body.decode(enc)
         except (UnicodeDecodeError, AttributeError):
@@ -23,6 +23,13 @@ def main():
     con = db.connect(config.DB_PATH)
     domains = [r[0] for r in con.execute("SELECT domain FROM site_meta")]
     ai_tokens = list(config.AI_CRAWLERS)
+
+    # Full rebuild from fetches. Each branch below writes only when a file is
+    # valid, so a row left from an earlier pass would outlive its file (a site
+    # now answering 403 kept counting as an llms.txt publisher).
+    for t in ("files", "verdicts", "robots_meta", "llms_meta", "tdmrep_meta"):
+        con.execute(f"DELETE FROM {t}")
+    con.execute("UPDATE site_meta SET cms = NULL, seo_plugin = NULL, cdn = NULL")
 
     for dom in domains:
         rows = {r[0]: r for r in con.execute(

@@ -115,8 +115,8 @@ name GPTBot; where that happens is uneven, and the press is the outlier.
 Crawler by crawler, the picture is the same one seen from the other side. Each
 bar is one crawler and splits into how the `{python} n_observed` sites we could
 read treat it: **blocked** at the root, **partial** (some paths off limits), or
-**allowed**. `{python} n_unobserved` sites blocked our crawler or answered from
-another site; they have no verdict and are left out. Every bar is a
+**allowed**. `{python} n_unobserved` sites blocked our crawler, failed with a server
+error or answered from another site; they have no verdict and are left out. Every bar is a
 whole, so the figures inside it are shares of sites, not counts — the counts are
 in the tooltip and the table. Use the menus to slice by sector, or by whether a
 rule *names the crawler* or comes from a catch-all `*`.

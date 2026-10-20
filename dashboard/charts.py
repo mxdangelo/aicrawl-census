@@ -66,8 +66,9 @@ def verdict_by_crawler(df, default_source="All"):
     source_p = alt.param(
         name="source", value=default_source,
         bind=alt.binding_select(
-            options=["All", "specific", "wildcard", "no_robots"],
-            labels=["Any rule", "Names the crawler", "Catch-all (*)", "No robots.txt"],
+            options=["All", "specific", "wildcard", "none", "no_robots"],
+            labels=["Any rule", "Names the crawler", "Catch-all (*)",
+                    "No rule applies", "No robots.txt"],
             name="Rule  "))
 
     # Aggregate inside the spec (after the dropdowns filter) so the printed

@@ -10,6 +10,10 @@ Usage (database and country default to CENSUS_COUNTRY, IT if unset):
     CENSUS_COUNTRY=FR python dashboard/build_data.py     # census-lite.fr.db, country FR
     python dashboard/build_data.py --snapshot-date 2026-08-01 --country IT
     python dashboard/build_data.py --db path/to/other.db --country FR
+
+Replacing a stored (snapshot_date, country) with a different set of domains is
+refused unless --replace is given: a re-crawl on a new sample under the same
+date would otherwise erase the old snapshot without a trace.
 """
 import argparse
 import datetime as dt
@@ -99,7 +103,24 @@ def _upsert(con, name, sql, snapshot_date, country):
                        f"FROM {src_tbl}").fetchone()
 
 
-def build(db_path, snapshot_date, country):
+def _guard_sample(con, snapshot_date, country, replace):
+    """Stop before overwriting a stored snapshot that counts a different number
+    of domains: same date, different sample is a new snapshot, not a re-run."""
+    path = OUT / "sector_signals.parquet"
+    if replace or not path.exists():
+        return
+    stored = con.execute(
+        "SELECT SUM(n_domains) FROM read_parquet(?) "
+        "WHERE snapshot_date = ? AND country = ?",
+        [str(path), snapshot_date, country]).fetchone()[0]
+    fresh = con.execute("SELECT COUNT(*) FROM src.dw_dim_domain").fetchone()[0]
+    if stored is not None and int(stored) != fresh:
+        raise SystemExit(
+            f"{country} {snapshot_date} is stored with {int(stored)} domains, the "
+            f"database has {fresh}. Use another --snapshot-date, or --replace.")
+
+
+def build(db_path, snapshot_date, country, replace=False):
     OUT.mkdir(exist_ok=True)
     con = duckdb.connect()
     con.execute("INSTALL sqlite; LOAD sqlite;")
@@ -111,6 +132,7 @@ def build(db_path, snapshot_date, country):
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", snapshot_date or ""):
         raise SystemExit(f"snapshot date must be YYYY-MM-DD, got {snapshot_date!r}")
 
+    _guard_sample(con, snapshot_date, country, replace)
     print(f"snapshot {snapshot_date} / country {country} from {db_path.name}")
     for name, sql in TABLES.items():
         rows, snaps = _upsert(con, name, sql, snapshot_date, country)
@@ -147,5 +169,7 @@ if __name__ == "__main__":
     ap.add_argument("--snapshot-date", default=None,
                     help="YYYY-MM-DD; defaults to the latest fetch date in the DB")
     ap.add_argument("--country", default=config.COUNTRY)
+    ap.add_argument("--replace", action="store_true",
+                    help="overwrite a stored snapshot even if its domain count differs")
     a = ap.parse_args()
-    build(a.db.resolve(), a.snapshot_date, a.country)
+    build(a.db.resolve(), a.snapshot_date, a.country, a.replace)

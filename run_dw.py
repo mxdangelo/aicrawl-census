@@ -29,7 +29,7 @@ CREATE TABLE dw_dim_domain (
     tier TEXT,                    -- pa only: central | regional | local
     cms TEXT, seo_plugin TEXT, cdn TEXT,
     observable INTEGER,           -- robots.txt reachable, served by this site
-    unobservable_reason TEXT,     -- blocked | offsite | NULL when observable
+    unobservable_reason TEXT,     -- blocked | server_error | offsite | NULL when observable
     robots_present INTEGER, llms_present INTEGER,
     llms_full_present INTEGER, tdmrep_present INTEGER,
     llms_origin TEXT,             -- hand | generated | none
@@ -46,10 +46,16 @@ CREATE TABLE dw_fact_policy (
 
 
 def _mark_offsite(con):
-    """A robots.txt that ends on another site (a rebrand, or a geo-redirect to
-    the site's Italian edition) was not this domain's own: not observable."""
-    con.execute("UPDATE dw_dim_domain SET unobservable_reason = 'blocked' "
-                "WHERE NOT COALESCE(observable, 0)")
+    """Label why each unobservable site is out, then add the offsite ones: a
+    robots.txt that ends on another site (a rebrand, or a geo-redirect to the
+    site's Italian edition) was not this domain's own."""
+    shielded_in = ",".join(str(s) for s in config.SHIELDED_STATUS)
+    con.execute(f"""UPDATE dw_dim_domain SET unobservable_reason =
+                      CASE WHEN (SELECT status >= 500 AND status NOT IN ({shielded_in})
+                                 FROM fetches WHERE domain = dw_dim_domain.domain
+                                   AND resource = 'robots')
+                           THEN 'server_error' ELSE 'blocked' END
+                    WHERE NOT COALESCE(observable, 0)""")
     rows = con.execute("""SELECT domain, final_url FROM fetches
                           WHERE resource = 'robots'""").fetchall()
     offsite = [d for d, url in rows if url and not net.same_site(d, url)]
@@ -75,7 +81,9 @@ def main():
             tdmrep_present, llms_origin, llms_has_instructions,
             ai_template_cluster, ai_cluster_size)
         SELECT s.domain, s.sector, s.tier, s.cms, s.seo_plugin, s.cdn,
-            (SELECT status NOT IN ({shielded_in}) FROM fetches
+            -- A 5xx is no policy: RFC 9309 has crawlers treat it as a full
+            -- disallow, but the site declared nothing we could read.
+            (SELECT status NOT IN ({shielded_in}) AND status < 500 FROM fetches
               WHERE domain=s.domain AND resource='robots'),
             COALESCE((SELECT present FROM files
                       WHERE domain=s.domain AND resource='robots'), 0),

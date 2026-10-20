@@ -40,6 +40,24 @@ r = rb.parse("user-agent: gptbot\nuser-agent: ClaudeBot\ndisallow: /")
 check("case-insensitive", rb.verdict_for(r, "GPTBot")[0], "blocked")
 check("multi-agent same group", rb.verdict_for(r, "ClaudeBot")[0], "blocked")
 
+# --- 5b. Product-token match: exact, not prefix ---
+r = rb.parse("User-agent: Google\nDisallow: /")
+check("prefix does not name Google-Extended", rb.verdict_for(r, "Google-Extended"),
+      ("allowed", "none", False))
+r = rb.parse("User-agent: GPTBot/1.1\nDisallow: /")
+check("version suffix still names the token", rb.verdict_for(r, "GPTBot")[0], "blocked")
+r = rb.parse("User-agent: ChatGPT\nDisallow: /")
+check("ChatGPT does not name ChatGPT-User", rb.verdict_for(r, "ChatGPT-User")[1], "none")
+r = rb.parse("User-agent:\nDisallow: /")
+check("empty user-agent names nobody", rb.verdict_for(r, "GPTBot")[1], "none")
+r = rb.parse("User-agent: AI2Bot\nDisallow: /")
+check("digits in token", rb.verdict_for(r, "AI2Bot")[0], "blocked")
+
+# --- 5c. A UTF-8 BOM does not swallow the first group ---
+r = rb.parse("\ufeffUser-agent: *\nDisallow: /")
+check("BOM before first user-agent", rb.verdict_for(r, "GPTBot"),
+      ("blocked", "wildcard", False))
+
 # --- 6. Empty Disallow = allow ---
 r = rb.parse("User-agent: GPTBot\nDisallow:")
 check("empty disallow", rb.verdict_for(r, "GPTBot"),

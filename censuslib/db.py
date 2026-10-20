@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS verdicts (        -- domain x crawler
     domain TEXT, crawler TEXT, operator TEXT, purpose TEXT,
     mentioned INTEGER,                       -- specific group in robots.txt
     verdict TEXT,                            -- blocked | allowed | partial
-    source TEXT,                             -- specific | wildcard | no_robots
+    source TEXT,                             -- specific | wildcard | none | no_robots
     PRIMARY KEY (domain, crawler)
 );
 CREATE TABLE IF NOT EXISTS robots_meta (

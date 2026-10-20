@@ -30,6 +30,8 @@ def parse(text: str) -> Robots:
     last_was_agent = False
     lines = text.splitlines()
     r.n_lines = len(lines)
+    if lines:  # a UTF-8 BOM would turn the first "User-agent" into an unknown key
+        lines[0] = lines[0].removeprefix("\ufeff")
     for i, raw in enumerate(lines):
         line = raw.strip()
         if not line:
@@ -71,19 +73,36 @@ def _pattern_to_regex(pattern: str):
     return re.compile("^" + "".join(parts))
 
 
-def _select_group(robots: Robots, ua_token: str):
-    """Group with the most specific user-agent match; none -> wildcard.
+# Product token at the start of a User-agent value (RFC 9309 §2.2.1). Digits are
+# allowed beyond the RFC's [a-zA-Z_-] because real tokens use them (AI2Bot).
+_TOKEN_RX = re.compile(r"[a-z0-9_-]+")
 
-    Returns (effective_rules, source) with source in {specific, wildcard, none}.
+
+def _agent_token(value: str) -> str:
+    """The token a User-agent line names: "*", the leading product token
+    ("googlebot/2.1" -> "googlebot"), or "" for an empty or garbled value."""
+    if value.startswith("*"):
+        return "*"
+    m = _TOKEN_RX.match(value)
+    return m.group(0) if m else ""
+
+
+def _select_group(robots: Robots, ua_token: str):
+    """Group with an exact (case-insensitive) product-token match; none ->
+    wildcard. A prefix is not a match: "Google" does not name Google-Extended.
+
+    Returns (effective_rules, source) with source in {specific, wildcard, none};
+    none = the file has groups, but neither one for this crawler nor a "*".
     Groups naming the same agent are merged (Google behavior).
     """
     ua = ua_token.lower()
     specific, wildcard = [], []
     for g in robots.groups:
         for a in g.agents:
-            if a == "*":
+            token = _agent_token(a)
+            if token == "*":
                 wildcard.extend(g.rules)
-            elif a == ua or ua.startswith(a) or a.startswith(ua):
+            elif token == ua:
                 specific.extend(g.rules)
     if specific:
         return specific, "specific"
@@ -134,7 +153,7 @@ def ai_block(robots: Robots, ai_tokens) -> tuple[str, str]:
     tokens = {t.lower() for t in ai_tokens}
     chunks = []
     for g in robots.groups:
-        if any(a in tokens for a in g.agents):
+        if any(_agent_token(a) in tokens for a in g.agents):
             head = "\n".join(f"user-agent: {a}" for a in sorted(g.agents))
             body = "\n".join(f"{t}: {p}" for t, p in g.rules)
             chunks.append(head + "\n" + body)

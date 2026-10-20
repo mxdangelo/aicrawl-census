@@ -32,8 +32,12 @@ interpreter path instead.
 Output: `census.db` (SQLite). Main tables:
 
 - `verdicts` — domain × crawler: verdict ∈ {blocked, partial, allowed},
-  source ∈ {specific, wildcard, no_robots}. "blocked" = root path denied
-  under RFC 9309 semantics (longest-match, allow wins on ties).
+  source ∈ {specific, wildcard, none, no_robots}; `none` = a valid
+  robots.txt with neither a group for the crawler nor a `*` group.
+  "blocked" = root path denied under RFC 9309 semantics (longest-match,
+  allow wins on ties). A group applies only when its product token equals
+  the crawler's (case-insensitive): `User-agent: Google` does not name
+  Google-Extended.
 - `files` — validated presence of the three files (soft-404 excluded,
   with the reason).
 - `robots_meta` — hash of the AI block (for clustering) + generator signatures.
@@ -78,6 +82,9 @@ snapshots (temporal dimension) and multiple countries. Build locally:
   so token order doesn't split clusters.
 - **`purpose` (training/search)**: enables the coherence analysis
   (e.g. blocks training but not search, or vice versa).
+- **Unobservable sites**: a robots.txt behind a block (status 0, 202, 403,
+  429, 451, 503), a 5xx, or a redirect to another site gets no verdict
+  (`verdict_source = 'unobservable'`), so it is never counted as allowing.
 - **www. fallback**: bare domains that fail DNS (common for PA sites,
   e.g. gov.it) are retried once with the `www.` prefix; `final_url`
   records what was actually fetched.
