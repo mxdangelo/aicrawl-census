@@ -305,3 +305,18 @@ h2 { margin: 0 0 0.7rem; padding: 0; border: 0; font-weight: 650; }
 .theme-toggle .moon { display: none; }
 [data-theme="dark"] .theme-toggle .sun { display: none; }
 [data-theme="dark"] .theme-toggle .moon { display: block; }
+
+// ---- Country navigation: above the kicker ----------------------------
+// Same ink as the dateline: it labels where the reader is, it doesn't argue.
+.country-nav {
+  font-size: 0.85rem;
+  color: var(--ink-3);
+  margin: 0 0 1.6rem;
+}
+.country-nav a { color: var(--ink-2); text-decoration: none; }
+.country-nav a:hover { color: var(--ink); text-decoration: underline; }
+.country-nav [aria-current] { color: var(--ink); font-weight: 600; }
+
+// Small multiples have a fixed width; on a phone they scroll inside their
+// own box instead of pushing the page sideways.
+.cell-output-display:has(.vega-embed) { overflow-x: auto; }

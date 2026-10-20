@@ -1,6 +1,28 @@
 project:
   type: website
   output-dir: _site
-  title: "AI Crawler Observatory · Italy"
+  title: "AI Crawler Observatory"
+  # One page per country plus the comparison; _observatory.qmd is the body the
+  # country pages include, not a page of its own.
+  render:
+    - index.qmd
+    - fr.qmd
+    - de.qmd
+    - uk.qmd
+    - es.qmd
+    - compare.qmd
   resources:
     - llms.txt
+
+format:
+  html:
+    theme: [cosmo, theme.scss]
+    page-layout: article
+    toc: false
+    anchor-sections: false
+    include-in-header: _head.html
+    include-after-body: _scripts.html
+
+execute:
+  echo: false
+  warning: false

@@ -38,7 +38,11 @@ differs by the three-signal frame, the European legal grounding, and by
 validating each signal rather than assuming presence.
 
 ## Data & method
-- Live observatory: https://mxdangelo.github.io/aicrawl-census/
+- Live observatory: https://mxdangelo.github.io/aicrawl-census/ (Italy), with
+  one page per country (fr.html, de.html, uk.html, es.html) and a comparison
+  (compare.html).
 - Code and dataset: https://github.com/mxdangelo/aicrawl-census
-- Data ships as Parquet aggregates (signal × sector × crawler, per snapshot);
-  the full pipeline and methodology are in the repository.
+- Data ships as Parquet: aggregates (signal × sector × crawler) and a
+  per-domain panel, keyed by snapshot date, country and sample version. Trends
+  are computed on the sites present in every snapshot; the full pipeline and
+  methodology are in the repository.

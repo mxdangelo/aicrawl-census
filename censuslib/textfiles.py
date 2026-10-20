@@ -9,11 +9,25 @@ def looks_like_html(body: str) -> bool:
     return "<html" in head or "<!doctype" in head or "<head" in head
 
 
+# Markers of bot-protection pages served with a 200 in place of the requested
+# file. Each is specific to one vendor's challenge or block page; none occurs
+# in an ordinary homepage served as a soft-404.
+CHALLENGE_RX = re.compile(
+    r"<title>\s*(just a moment|attention required|access denied|request rejected)"
+    r"|/cdn-cgi/challenge-platform/|_incapsula_resource|captcha-delivery\.com"
+    r"|the requested url was rejected", re.I)
+
+
+def is_challenge(body: str) -> bool:
+    return bool(CHALLENGE_RX.search(body[:20_000]))
+
+
 def validate_robots(status: int, content_type: str, body: str):
     if status != 200:
         return False, f"status_{status}"
     if looks_like_html(body):
-        return False, "soft404_html"
+        # A challenge page means we were blocked, not that robots.txt is absent.
+        return False, "challenge" if is_challenge(body) else "soft404_html"
     if not body.strip():
         return False, "empty"
     if not re.search(r"^\s*(user-agent|sitemap|disallow|allow)\s*:", body,
@@ -144,13 +158,24 @@ def parse_tdmrep(body: str) -> dict:
 
 
 def tdm_headers(headers: dict) -> bool:
-    return any(k.lower().startswith("tdm-") for k in headers)
+    """TDMRep's header channel asserts a reservation: `tdm-reservation: 1`.
+    A 0 is an explicit non-reservation, and other tdm-* names are not in the
+    spec (four Italian publishers send `tdm-a: 1`)."""
+    return any(k.lower() == "tdm-reservation" and str(v).strip() == "1"
+               for k, v in headers.items())
 
 
-TDM_META_RX = re.compile(
-    r'<meta[^>]+name\s*=\s*["\']tdm-(?:reservation|policy)["\']', re.I)
+META_TAG_RX = re.compile(r"<meta\b[^>]*>", re.I)
+ATTR_RX = re.compile(r"""([a-z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))""", re.I)
 
 
 def tdm_meta(html_body: str) -> bool:
-    """TDMRep's third channel: <meta name="tdm-reservation"> in the HTML."""
-    return bool(TDM_META_RX.search(html_body))
+    """TDMRep's third channel: <meta name="tdm-reservation" content="1"> in the
+    HTML, attributes in any order."""
+    for tag in META_TAG_RX.findall(html_body):
+        attrs = {k.lower(): next(v for v in vals if v)
+                 for k, *vals in ATTR_RX.findall(tag) if any(vals)}
+        if (attrs.get("name", "").lower() == "tdm-reservation"
+                and attrs.get("content", "").strip() == "1"):
+            return True
+    return False

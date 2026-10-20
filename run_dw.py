@@ -9,10 +9,8 @@ Three-layer architecture, per BI convention:
 The fact grain is domain × crawler; everything analytical joins on surrogate
 keys. Rebuilt idempotently from staging on every run.
 """
-import sqlite3
-
 import config
-from censuslib import net
+from censuslib import db, net
 
 DDL = """
 DROP TABLE IF EXISTS dw_fact_policy;
@@ -66,7 +64,7 @@ def _mark_offsite(con):
 
 
 def main():
-    con = sqlite3.connect(config.DB_PATH)
+    con = db.connect(config.DB_PATH)  # also adds columns older databases lack
     con.executescript(DDL)
 
     for crawler, (operator, purpose) in config.AI_CRAWLERS.items():
@@ -84,18 +82,30 @@ def main():
             -- A 5xx is no policy: RFC 9309 has crawlers treat it as a full
             -- disallow, but the site declared nothing we could read.
             (SELECT status NOT IN ({shielded_in}) AND status < 500 FROM fetches
-              WHERE domain=s.domain AND resource='robots'),
+              WHERE domain=s.domain AND resource='robots')
+              -- a challenge page served with a 200 is a block as well
+              AND COALESCE((SELECT reason != 'challenge' FROM files
+                            WHERE domain=s.domain AND resource='robots'), 1),
             COALESCE((SELECT present FROM files
                       WHERE domain=s.domain AND resource='robots'), 0),
             COALESCE((SELECT present FROM files
                       WHERE domain=s.domain AND resource='llms'), 0),
             COALESCE((SELECT present FROM files
                       WHERE domain=s.domain AND resource='llms_full'), 0),
-            COALESCE((SELECT valid=1 OR via_header=1 OR via_meta=1
-                      FROM tdmrep_meta WHERE domain=s.domain), 0),
+            -- files gates the *_meta tables: they may hold rows of files
+            -- that have since disappeared (databases parsed before the fix).
+            -- reserving, not merely present: the file must say
+            -- tdm-reservation 1 for its widest location
+            COALESCE((SELECT (t.valid=1 AND t.reservation_root=1
+                              AND COALESCE(f.present, 0)=1)
+                             OR t.via_header=1 OR t.via_meta=1
+                      FROM tdmrep_meta t LEFT JOIN files f
+                        ON f.domain=t.domain AND f.resource='tdmrep'
+                      WHERE t.domain=s.domain), 0),
             CASE
-              WHEN (SELECT valid FROM llms_meta WHERE domain=s.domain) IS NULL
-                   OR (SELECT valid FROM llms_meta WHERE domain=s.domain)=0
+              WHEN COALESCE((SELECT valid FROM llms_meta WHERE domain=s.domain), 0)=0
+                   OR COALESCE((SELECT present FROM files
+                                WHERE domain=s.domain AND resource='llms'), 0)=0
                 THEN 'none'
               WHEN (SELECT signatures != ''
                         OR COALESCE(full_similarity,0) >= 0.9

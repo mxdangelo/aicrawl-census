@@ -18,11 +18,14 @@ python run_fetch.py              # stage 1: fetch (idempotent with --only-missin
 python run_refetch.py            # stage 1b: retry shielded domains (curl_cffi,
                                  #           browser TLS impersonation)
 python run_parse.py              # stage 2+3: validation, parsing, verdicts
+                                 #   (--lite: verdicts + TDMRep headers only,
+                                 #    for databases without raw bodies)
 python run_cluster.py            # stage 4: template clustering
 python run_dw.py                 # stage 5: star-schema DW layer (dw_* tables)
 python build_lite.py             # stage 6: census-lite.db, the tracked snapshot
                                  #          (census.db minus raw bodies)
 python test_parsers.py           # parser tests
+python test_pipeline.py          # parse -> cluster -> DW on a synthetic DB
 ```
 
 Windows note: if `python` resolves to the Microsoft Store alias
@@ -66,9 +69,17 @@ Output: `census.db` (SQLite). Main tables:
 
 Dashboard: a data-driven observatory (Altair + Quarto), **live at
 [mxdangelo.github.io/aicrawl-census](https://mxdangelo.github.io/aicrawl-census/)**
-— block / offer / reserve across Italian sectors, built to scale over periodic
-snapshots (temporal dimension) and multiple countries. Build locally:
-`python dashboard/build_data.py` then `quarto render dashboard/index.qmd`.
+— block / offer / reserve by sector, one page per country (all built from
+`dashboard/_observatory.qmd`) plus a cross-country comparison. Every figure
+and every number in the prose is computed from `dashboard/data/`; shares are of
+observable sites. Build locally: `python dashboard/build_data.py` per country,
+then `quarto render dashboard`.
+
+Snapshots are keyed by (date, country, sample). `config.SAMPLES` holds each
+country's domain-list version: bump it when a list changes, so the new crawl
+is stored next to the old one rather than over it. Aggregates compare only
+within a sample; trends run on `domain_panel.parquet`, restricted to the
+domains present at every date.
 
 ## Design decisions
 

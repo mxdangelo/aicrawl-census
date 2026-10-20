@@ -1,9 +1,16 @@
 """Stage 2+3 — Validation, parsing, normalization into verdicts.
 
-Usage: python run_parse.py
+Usage: python run_parse.py [--lite]
 Reads the fetches table, writes files, verdicts, robots_meta, llms_meta,
 tdmrep_meta and updates site_meta with the CMS fingerprint.
+
+--lite re-derives what a database without raw bodies still allows
+(census-lite*.db and the snapshots kept in git history): verdicts from
+robots_meta.parsed_json and the TDMRep header channel from the homepage
+headers. Everything else is left as it is; a robots.txt whose first group was
+lost to a UTF-8 BOM stays lost, since parsed_json never saw it.
 """
+import argparse
 import json
 
 import config
@@ -17,6 +24,45 @@ def decode(body: bytes) -> str:
         except (UnicodeDecodeError, AttributeError):
             continue
     return ""
+
+
+def write_verdicts(con, dom, parsed):
+    """One verdicts row per AI crawler; parsed=None means no valid robots.txt."""
+    for token, (op, purpose) in config.AI_CRAWLERS.items():
+        if parsed is None:
+            row = (dom, token, op, purpose, 0, "allowed", "no_robots")
+        else:
+            verdict, source, mentioned = rb.verdict_for(parsed, token)
+            row = (dom, token, op, purpose, int(mentioned), verdict, source)
+        con.execute("INSERT OR REPLACE INTO verdicts VALUES (?,?,?,?,?,?,?)", row)
+
+
+def lite(con):
+    """Rebuild verdicts from the parsed robots.txt kept in robots_meta, and the
+    TDMRep header flag from the stored headers. Only robots.txt files still
+    valid count: robots_meta can hold rows of files that have since
+    disappeared."""
+    rows = con.execute("""SELECT f.domain, r.parsed_json FROM files f
+                           LEFT JOIN robots_meta r USING (domain)
+                           WHERE f.resource = 'robots'""").fetchall()
+    present = {d for d, in con.execute(
+        "SELECT domain FROM files WHERE resource = 'robots' AND present = 1")}
+    con.execute("DELETE FROM verdicts")
+    for dom, pj in rows:
+        parsed = None
+        if dom in present and pj:
+            p = json.loads(pj)
+            parsed = rb.Robots(groups=[
+                rb.Group(agents=g["agents"], rules=[tuple(r) for r in g["rules"]])
+                for g in p["groups"]])
+        write_verdicts(con, dom, parsed)
+    for dom, hdrs in con.execute("""SELECT t.domain, x.headers_json FROM tdmrep_meta t
+                                    JOIN fetches x ON x.domain = t.domain
+                                    AND x.resource = 'home'""").fetchall():
+        con.execute("UPDATE tdmrep_meta SET via_header = ? WHERE domain = ?",
+                    (int(tf.tdm_headers(json.loads(hdrs))), dom))
+    con.commit()
+    print(f"Verdicts and TDMRep headers re-derived for {len(rows)} domains.")
 
 
 def main():
@@ -53,16 +99,9 @@ def main():
                      len(parsed.comments), block_hash, block_text,
                      ",".join(rb.signatures(comments)),
                      json.dumps(rb.as_dict(parsed))))
-                for token, (op, purpose) in config.AI_CRAWLERS.items():
-                    verdict, source, mentioned = rb.verdict_for(parsed, token)
-                    con.execute(
-                        "INSERT OR REPLACE INTO verdicts VALUES (?,?,?,?,?,?,?)",
-                        (dom, token, op, purpose, int(mentioned), verdict, source))
+                write_verdicts(con, dom, parsed)
             else:
-                for token, (op, purpose) in config.AI_CRAWLERS.items():
-                    con.execute(
-                        "INSERT OR REPLACE INTO verdicts VALUES (?,?,?,?,?,?,?)",
-                        (dom, token, op, purpose, 0, "allowed", "no_robots"))
+                write_verdicts(con, dom, None)
 
         # ---- llms.txt + llms-full.txt ----
         full_ok, full_text = False, ""
@@ -144,4 +183,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--lite", action="store_true")
+    if ap.parse_args().lite:
+        lite(db.connect(config.DB_PATH))
+    else:
+        main()

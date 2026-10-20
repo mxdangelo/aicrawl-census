@@ -9,6 +9,14 @@ SUFFIX = "" if COUNTRY == "IT" else f".{COUNTRY.lower()}"
 DB_PATH = f"census{SUFFIX}.db"
 DOMAINS_CSV = f"domains{SUFFIX}.csv"  # columns: domain,sector
 
+# Version of each country's domain list, as the month it was drawn. Bump it
+# whenever the list changes: snapshots are comparable as aggregates only
+# within one sample (across samples, use the per-domain panel). Italy's
+# 543-domain list of July-October 2026 is "2026-07".
+SAMPLES = {"IT": "2026-10", "FR": "2026-10", "DE": "2026-10", "UK": "2026-10",
+           "ES": "2026-10"}
+SAMPLE = SAMPLES.get(COUNTRY, "")
+
 # User-agent token -> (operator, declared purpose)
 # Purposes: training = model training; search = live retrieval/citation;
 # both = ambiguous or both. The distinction matters for the coherence analysis.

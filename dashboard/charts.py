@@ -134,12 +134,21 @@ def _block_agg(df, crawler):
     return agg
 
 
-def block_by_sector(df, crawler="GPTBot", emphasize="news"):
+def top_block_sector(df, crawler="GPTBot"):
+    """The sector with the highest share of sites blocking the crawler by name:
+    the hero chart's emphasis and the lead sentence's subject."""
+    agg = _block_agg(df, crawler)
+    return agg.sort_values(["pct", "tot"], ascending=False).iloc[0]
+
+
+def block_by_sector(df, crawler="GPTBot", emphasize=None):
     """Hero finding: share of each sector that *specifically* blocks the given
-    crawler. Emphasis form — the story sector in the accent ink, the rest gray;
+    crawler. Emphasis form — the top sector in the accent ink, the rest gray;
     no gridlines, no x-axis (every bar is directly labeled with its %). The
     tooltip carries the counts behind the percentage."""
     agg = _block_agg(df, crawler)
+    if emphasize is None:
+        emphasize = top_block_sector(df, crawler)["sector"]
     agg["pct_label"] = agg["pct"].round().astype(int).astype(str) + "%"
 
     base = alt.Chart(agg).encode(
@@ -159,9 +168,16 @@ def block_by_sector(df, crawler="GPTBot", emphasize="news"):
     return theme.themed((bars + labels).properties(width="container", height=360))
 
 
+# llms.txt origin as the data can support it: a plugin's signature (or a
+# near-copy of llms-full.txt) marks a default; its absence suggests, but does
+# not prove, a file written on purpose.
+ORIGIN_LABELS = {"observable_llms_hand": "no plugin signature",
+                 "observable_llms_generated": "plugin default"}
+
+
 def offer_by_sector(sig):
-    """Offer finding: among the sites that publish an llms.txt at all, how many
-    wrote it by hand (a decision) versus inherited it from a plugin.
+    """Offer finding: among the observable sites that publish an llms.txt, how
+    many carry no plugin signature versus a plugin's default.
 
     Grouped, not stacked: this section asks how much adoption was a decision, so
     the two quantities are the finding and the sector total is the confusing
@@ -174,10 +190,9 @@ def offer_by_sector(sig):
     sits on the lane center, a pair straddles it by ±OFF. Dividers are explicit
     rules between lanes only — none above the first lane or below the last."""
     OFF = 0.2                       # half-gap between the two bars of a sector
-    d = sig.melt(id_vars=["sector"], value_vars=["llms_hand", "llms_generated"],
+    d = sig.melt(id_vars=["sector"], value_vars=list(ORIGIN_LABELS),
                  var_name="origin", value_name="n")
-    d["origin"] = d["origin"].map(
-        {"llms_hand": "hand-written", "llms_generated": "plugin default"})
+    d["origin"] = d["origin"].map(ORIGIN_LABELS)
     d["sector_label"] = d["sector"].map(SECTOR_LABELS).fillna(d["sector"])
 
     tot = d.groupby("sector_label", as_index=False)["n"].sum()
@@ -190,7 +205,7 @@ def offer_by_sector(sig):
     bar["lane"] = bar["sector_label"].map(lane)
     # How many bars this sector actually has — one bar centers, two straddle.
     pair = bar.groupby("lane")["origin"].transform("size").eq(2)
-    sign = bar["origin"].map({"hand-written": -1, "plugin default": 1})
+    sign = bar["origin"].map({"no plugin signature": -1, "plugin default": 1})
     bar["yc"] = bar["lane"] + sign * OFF * pair          # lone bar: +0 → centered
     # Thickness is an explicit vertical span (y..y2) so the bar is horizontal —
     # x alone is the length. A continuous y with no span makes a vertical bar.
@@ -198,7 +213,7 @@ def offer_by_sector(sig):
     bar["y1"] = bar["yc"] + THICK / 2
     bar["x0"] = 0                   # y2 ranges the bar, so x needs a span too
 
-    origin_domain = ["hand-written", "plugin default"]
+    origin_domain = list(ORIGIN_LABELS.values())
     y_scale = alt.Scale(domain=[n_lanes - 0.5, -0.5])   # lane 0 at top
     x_scale = alt.Scale(domain=[0, d["n"].max() * 1.12])   # headroom for labels
     x = alt.X("x0:Q", axis=None, title=None, scale=x_scale)
@@ -240,33 +255,27 @@ def offer_by_sector(sig):
         .configure_concat(spacing=10))
 
 
-# Reserve views group the reserving sectors into two reader-facing categories.
-RESERVE_CATEGORY = {
-    "publishing_education": "Publishers & universities",
-    "news": "News",
-}
-
-
-def signal_cards(df, sig, reserved, crawler="GPTBot"):
+def signal_cards(page, crawler="GPTBot"):
     """The three signals as the page's routing layer: one card each, carrying
     the headline figure and linking to its section. This is the 'overview'
     step — the whole observatory in three numbers, before any chart.
 
-    Reserve reads as a count, not a share, on purpose: eight sites is a
-    countable handful and rounding it to 1.5% buries the finding.
-
-    All figures come from the data — the page's prose does not."""
-    total = int(sig["n_domains"].sum())
-    agg = _block_agg(df, crawler)
+    Every figure is a share of the observable sites, the base the sections use.
+    Reserve reads as a count when it is a countable handful: rounding a few
+    sites to a percentage buries the finding."""
+    agg = _block_agg(page.facts, crawler)
     blocked = 100 * agg["blk"].sum() / agg["tot"].sum()
-    offer = 100 * (sig["llms_hand"].sum() + sig["llms_generated"].sum()) / total
+    reserve = (f"{page.n_reserve}" if page.n_reserve < 20
+               else page.pct(page.n_reserve))
+    reserve_what = (f"of {page.n_observed} reserve rights" if page.n_reserve < 20
+                    else "reserve rights")
 
     cards = [
         ("block", f"{blocked:.1f}%", f"block {crawler} by name",
          "robots.txt rules that shut a named AI crawler out."),
-        ("offer", f"{offer:.1f}%", "publish an llms.txt",
+        ("offer", page.pct(page.n_llms), "publish an llms.txt",
          "A file that offers models a curated view of the site."),
-        ("reserve", f"{len(reserved)}", f"of {total} reserve rights",
+        ("reserve", reserve, reserve_what,
          "TDMRep — the only signal with legal weight in the EU."),
     ]
     items = "".join(
@@ -278,23 +287,85 @@ def signal_cards(df, sig, reserved, crawler="GPTBot"):
     return f'<nav class="signal-cards" aria-label="The three signals">{items}</nav>'
 
 
-def reserve_stat(sig, reserved):
-    """Reserve finding as a single number, not a chart: eight sites out of the
-    sample is too little to plot — any chart of it is a near-empty field the
-    reader has to decode. The figure states it, the table below names the
+def _reserving(reserved):
+    """Reserving sites that count: the observable ones, like every share."""
+    return reserved[reserved["observable"] == 1]
+
+
+def reserve_by_sector(reserved):
+    """Reserving sites per sector, largest first, as reader-facing labels."""
+    sectors = _reserving(reserved)["sector"]
+    return sectors.map(SECTOR_LABELS).fillna(sectors).value_counts()
+
+
+def reserve_stat(page):
+    """Reserve finding as a single number, not a chart: a handful of sites is
+    too little to plot. The figure states it, the table below names the
     sites. Computed from the data so it can't go stale."""
-    total = int(sig["n_domains"].sum())
-    n = len(reserved)
-    by_cat = (reserved["sector"].map(RESERVE_CATEGORY).fillna("Other")
-              .value_counts())
-    breakdown = " · ".join(f"{cat} {int(c)}" for cat, c in by_cat.items())
+    by = reserve_by_sector(page.reserved)
+    parts = [f"{sector} {int(c)}" for sector, c in by.items()]
+    rest = page.n_sectors - len(by)
+    if parts and rest:
+        parts.append(f"the other {rest} sectors 0")
+    breakdown = " · ".join(parts) or "no site in any sector"
     return (
         '<div class="statblock">'
-        f'<p class="stat-figure"><span class="stat-number">{n}</span>'
-        f'<span class="stat-unit">of {total} sites</span></p>'
-        f'<p class="stat-note">{breakdown} · every other sector 0</p>'
+        f'<p class="stat-figure"><span class="stat-number">{page.n_reserve}</span>'
+        f'<span class="stat-unit">of {page.n_observed} sites</span></p>'
+        f'<p class="stat-note">{breakdown}</p>'
         '</div>'
     )
+
+
+def trend_chart(t):
+    """The three headline shares over time on the fixed panel, one small
+    multiple each: their scales differ by an order of magnitude, so a shared
+    axis would flatten the smaller two."""
+    base = alt.Chart(t).encode(
+        x=alt.X("snapshot_date:T", title=None,
+                axis=alt.Axis(format="%d %b", tickCount=len(t["snapshot_date"].unique()),
+                              domain=False, ticks=False, labelAngle=0)),
+        y=alt.Y("share:Q", title=None,
+                axis=alt.Axis(format=".1~%", tickCount=4, domain=False, ticks=False),
+                scale=alt.Scale(zero=True)),
+        tooltip=[alt.Tooltip("snapshot_date:T", title="snapshot", format="%Y-%m-%d"),
+                 alt.Tooltip("measure:N"), alt.Tooltip("n:Q", title="sites"),
+                 alt.Tooltip("base:Q", title="observed"),
+                 alt.Tooltip("share:Q", format=".1%")])
+    line = base.mark_line(color=theme.ACCENT, strokeWidth=2)
+    dots = base.mark_point(color=theme.ACCENT, filled=True, size=45)
+    return theme.themed(
+        (line + dots).properties(width=190, height=170)
+        .facet(column=alt.Column("measure:N", title=None,
+                                 sort=list(t["measure"].unique()),
+                                 header=alt.Header(labelFontSize=13, labelColor=theme.INK,
+                                                   labelAnchor="start")))
+        .resolve_scale(y="independent"))
+
+
+COMPARE_MEASURES = ["Block GPTBot by name", "… news sites", "… central government",
+                    "Publish an llms.txt", "Reserve rights (TDMRep)"]
+
+
+def compare_chart(c):
+    """Each headline share by country, one small multiple per measure; every
+    country sits on its own row so the eye compares along one axis."""
+    d = c.melt(id_vars=["country"], value_vars=COMPARE_MEASURES,
+               var_name="measure", value_name="share")
+    base = alt.Chart(d).encode(
+        y=alt.Y("country:N", title=None, sort=list(c["country"]),
+                axis=alt.Axis(domain=False, ticks=False)),
+        x=alt.X("share:Q", axis=None))
+    bars = base.mark_bar(color=theme.BAR_GRAY, height=14, cornerRadiusEnd=3).encode(
+        tooltip=["country:N", "measure:N", alt.Tooltip("share:Q", format=".1%")])
+    labels = base.mark_text(align="left", dx=4, fontSize=11, color=theme.INK).encode(
+        text=alt.Text("share:Q", format=".0%"))
+    return theme.themed(
+        (bars + labels).properties(width=130, height=150)
+        .facet(column=alt.Column("measure:N", title=None, sort=COMPARE_MEASURES,
+                                 header=alt.Header(labelFontSize=12, labelColor=theme.INK,
+                                                   labelAnchor="start", labelLimit=160)))
+        .resolve_scale(x="independent"))
 
 
 # --- Table views -----------------------------------------------------------
@@ -345,23 +416,42 @@ def verdict_table(df, source="specific"):
 
 def offer_table(sig):
     t = sig.copy()
-    t["total"] = t["llms_hand"] + t["llms_generated"]
-    t = t.sort_values(["total", "llms_hand"], ascending=False)
+    t["total"] = t["observable_llms_hand"] + t["observable_llms_generated"]
+    t = t.sort_values(["total", "observable_llms_hand"], ascending=False)
     return pd.DataFrame({
         "Sector": t["sector"].map(SECTOR_LABELS).fillna(t["sector"]),
-        "Hand-written": t["llms_hand"].astype(int),
-        "Plugin default": t["llms_generated"].astype(int),
+        "No plugin signature": t["observable_llms_hand"].astype(int),
+        "Plugin default": t["observable_llms_generated"].astype(int),
         "Total": t["total"].astype(int),
-        "Sites in sample": t["n_domains"].astype(int),
+        "Sites observed": t["observable"].astype(int),
+        "Share": (100 * t["total"] / t["observable"]).map("{:.1f}%".format),
     })
 
 
 def reserve_table(reserved):
-    r = reserved.copy()
-    r["category"] = r["sector"].map(RESERVE_CATEGORY).fillna("Other")
-    r = r.sort_values(["category", "domain"], ascending=[False, True])
+    r = _reserving(reserved).copy()
+    r["label"] = r["sector"].map(SECTOR_LABELS).fillna(r["sector"])
+    r = r.sort_values(["label", "domain"])
     return pd.DataFrame({
         "Site": r["domain"],
-        "Who": r["category"],
+        "Sector": r["label"],
         "Signals via": r["channels"],
     })
+
+
+def trend_table(t):
+    w = t.pivot(index="snapshot_date", columns="measure", values="n")
+    w = w[list(t["measure"].unique())]
+    w.columns.name = None
+    base = t.groupby("snapshot_date")["base"].first()
+    w.insert(0, "Sites observed", base)
+    return w.reset_index().rename(columns={"snapshot_date": "Snapshot"})
+
+
+def compare_table(c):
+    t = c.copy()
+    for m in COMPARE_MEASURES:
+        t[m] = (100 * t[m]).map("{:.1f}%".format)
+    t = t.drop(columns=["top sector", "central sites"])
+    return t.rename(columns={"country": "Country", "sites observed": "Sites observed",
+                             "snapshot": "Snapshot"})

@@ -107,6 +107,13 @@ domains present in every snapshot.
   `feltrinelli.it` and `unipolsai.it` (aliases of sites already in the sample),
   `comune.prato.it` (to keep the `pa` count when `cdp.it` moved there).
 
+
+The dashboard keeps both lists apart: the four earlier snapshots carry sample
+version `2026-07`, the current list `2026-10` (`config.SAMPLES`). A crawl of the
+2026-07 list on 2026-10-02 and the first crawl of the 2026-10 list on the same
+day are both stored. Trends are computed on `domain_panel.parquet`, on the
+domains present at every date.
+
 ## Observability and vantage
 
 All fetches run from one Italian address on GARR, the national research network.

@@ -1,0 +1,9 @@
+---
+title: "AI Crawler Observatory · France"
+---
+
+```{python}
+COUNTRY = "FR"
+```
+
+{{< include _observatory.qmd >}}

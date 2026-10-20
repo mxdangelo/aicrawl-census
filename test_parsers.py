@@ -1,4 +1,6 @@
 """Tests for the critical cases. Usage: python test_parsers.py"""
+import sys
+
 from censuslib import net, robots as rb, textfiles as tf
 
 FAILS = []
@@ -95,6 +97,15 @@ check("valid llms", tf.validate_llms(200, "text/plain",
 check("llms not markdown", tf.validate_llms(200, "text/plain",
       "welcome to the site")[1], "not_markdown")
 
+# --- 11a. challenge page in place of robots.txt ---
+check("cloudflare challenge", tf.validate_robots(200, "text/html",
+      "<!DOCTYPE html><html><head><title>Just a moment...</title>")[1], "challenge")
+check("F5 rejection", tf.validate_robots(200, "text/html",
+      "<html><head><title>Request Rejected</title></head><body>"
+      "The requested URL was rejected.</body></html>")[1], "challenge")
+check("homepage stays soft404", tf.validate_robots(200, "text/html",
+      "<!doctype html><html><head><title>Comune di Parma</title>")[1], "soft404_html")
+
 # --- 11b. sloppy markdown: no space after # (facile.it case) ---
 check("llms no space after hash", tf.validate_llms(200, "text/plain",
       "#Facile.it\n\n>Italy's price comparison site\n- [x](u)")[0], True)
@@ -157,8 +168,17 @@ check("tdmrep non-array", tf.validate_tdmrep(200, "", '{"a":1}')[1], "not_array"
 # --- 16. tdm meta tags ---
 check("tdm meta detected", tf.tdm_meta(
     '<head><meta name="tdm-reservation" content="1"></head>'), True)
-check("tdm meta case/quotes", tf.tdm_meta(
-    "<META NAME='TDM-Policy' content='https://x/p'>"), True)
+check("tdm meta case/quotes/order", tf.tdm_meta(
+    "<META CONTENT='1' NAME='TDM-Reservation'>"), True)
+check("tdm meta reservation 0", tf.tdm_meta(
+    '<meta name="tdm-reservation" content="0">'), False)
+check("tdm meta policy alone", tf.tdm_meta(
+    "<meta name='tdm-policy' content='https://x/p'>"), False)
+
+# --- 16b. tdm headers: only tdm-reservation: 1 reserves ---
+check("tdm header reserves", tf.tdm_headers({"TDM-Reservation": "1"}), True)
+check("tdm header 0", tf.tdm_headers({"tdm-reservation": "0"}), False)
+check("tdm header not in spec", tf.tdm_headers({"tdm-a": "1"}), False)
 check("no false positive on prose", tf.tdm_meta(
     "<p>we support tdm-reservation soon</p>"), False)
 
@@ -172,3 +192,4 @@ check("geo-redirect is offsite",
 check("suffix lookalike is offsite", net.same_site("bet.it", "https://notbet.it/"), False)
 
 print(f"\n{'ALL OK' if not FAILS else f'FAILED: {FAILS}'}")
+sys.exit(1 if FAILS else 0)
