@@ -34,7 +34,11 @@ CREATE TABLE dw_dim_domain (
     llms_full_present INTEGER, tdmrep_present INTEGER,
     llms_origin TEXT,             -- hand | generated | none
     llms_has_instructions INTEGER,
-    ai_template_cluster TEXT, ai_cluster_size INTEGER
+    ai_template_cluster TEXT, ai_cluster_size INTEGER,
+    ai_training_pref TEXT,        -- __usage_ai-training at the root:
+                                  -- against | partial | in_favor | none,
+                                  -- NULL when not observable
+    ai_training_exceptions INTEGER
 );
 CREATE TABLE dw_fact_policy (
     domain_key INTEGER REFERENCES dw_dim_domain(domain_key),
@@ -99,6 +103,17 @@ def main():
             (SELECT cluster_size FROM clusters WHERE domain=s.domain)
         FROM site_meta s""")
     _mark_offsite(con)
+
+    # Usage preference: a property of the site, orthogonal to the crawler
+    # verdicts (draft §4.3), hence on the domain dimension, not in the fact.
+    con.execute("""
+        UPDATE dw_dim_domain SET
+            ai_training_pref = CASE WHEN observable THEN COALESCE(
+                (SELECT pref FROM usage_prefs u WHERE u.domain = dw_dim_domain.domain
+                   AND u.token = '__usage_ai-training'), 'none') END,
+            ai_training_exceptions = CASE WHEN observable THEN COALESCE(
+                (SELECT exceptions FROM usage_prefs u WHERE u.domain = dw_dim_domain.domain
+                   AND u.token = '__usage_ai-training'), 0) END""")
 
     # An unobservable site has no verdict: whatever run_parse derived from a
     # block page or another site's robots.txt is replaced, so it can never be

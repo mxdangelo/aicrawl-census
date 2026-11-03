@@ -50,6 +50,13 @@ CREATE TABLE IF NOT EXISTS tdmrep_meta (
     via_meta INTEGER,                        -- tdm-* meta tags in the homepage HTML
     rules_json TEXT                          -- validated rule array (JSON)
 );
+CREATE TABLE IF NOT EXISTS usage_prefs (     -- domain x policy token
+    domain TEXT, token TEXT,
+    pref TEXT,                               -- against | partial | in_favor | none
+    exceptions INTEGER,                      -- against at root, some path allowed
+    mixed_group INTEGER,                     -- token shares a group with other agents
+    PRIMARY KEY (domain, token)
+);
 CREATE TABLE IF NOT EXISTS site_meta (
     domain TEXT PRIMARY KEY,
     sector TEXT, cms TEXT, seo_plugin TEXT, cdn TEXT,
@@ -59,7 +66,7 @@ CREATE TABLE IF NOT EXISTS site_meta (
 
 # Tables that hold one snapshot's rows per domain (clusters is rebuilt each run).
 DOMAIN_TABLES = ("fetches", "files", "verdicts", "robots_meta", "llms_meta",
-                 "tdmrep_meta", "site_meta")
+                 "tdmrep_meta", "usage_prefs", "site_meta")
 
 
 def connect(path):

@@ -153,4 +153,36 @@ check("geo-redirect is offsite",
       net.same_site("pokerstars.de", "https://www.pokerstars.it/robots.txt"), False)
 check("suffix lookalike is offsite", net.same_site("bet.it", "https://notbet.it/"), False)
 
+# --- 18. policy token __usage_ai-training (draft-kelley-...-00) ---
+T = "__usage_ai-training"
+fig1 = "User-Agent: __usage_ai-training\nDisallow: /\nAllow: /press-kit/"
+r = rb.parse(fig1)
+check("figure 1: against at root, with exception", rb.usage_pref(r, T),
+      ("against", 1, 0))
+check("figure 1: allowed under /press-kit/ (other paths against)",
+      rb.usage_pref(r, T, "/press-kit/logo.png")[0], "partial")
+r = rb.parse("User-agent: *\nDisallow: /")
+check("* group never matches the token (§4.2)", rb.usage_pref(r, T),
+      ("none", 0, 0))
+r = rb.parse("User-agent: GPTBot\nDisallow: /")
+check("no token line: no preference", rb.usage_pref(r, T)[0], "none")
+r = rb.parse("USER-AGENT: __USAGE_AI-TRAINING\nDisallow: /")
+check("token matched case-insensitively", rb.usage_pref(r, T)[0], "against")
+r = rb.parse("User-agent: __usage_ai\nDisallow: /")
+check("token prefix is no match (§4.1)", rb.usage_pref(r, T)[0], "none")
+r = rb.parse("User-agent: __usage_ai-training\nDisallow:")
+check("empty disallow: in favor", rb.usage_pref(r, T)[0], "in_favor")
+r = rb.parse("User-agent: __usage_ai-training\nDisallow: /archive/")
+check("path-level preference", rb.usage_pref(r, T)[0], "partial")
+r = rb.parse("User-agent: GPTBot\nUser-agent: __usage_ai-training\nDisallow: /")
+check("mixed group flagged", rb.usage_pref(r, T), ("against", 0, 1))
+r = rb.parse("User-agent: __usage_ai-training\nDisallow: /\n\n"
+             "User-agent: GPTBot\nAllow: /")
+check("crawler verdict independent of the token (§4.3)",
+      rb.verdict_for(r, "GPTBot"), ("allowed", "specific", True))
+check("token group not inherited by unmentioned crawlers",
+      rb.verdict_for(r, "ClaudeBot"), ("allowed", "none", False))
+_, h = rb.ai_block(rb.parse(fig1), [T])
+check("token group enters the AI block hash", h != "", True)
+
 print(f"\n{'ALL OK' if not FAILS else f'FAILED: {FAILS}'}")

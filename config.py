@@ -35,6 +35,16 @@ AI_CRAWLERS = {
     "MistralAI-User":     ("Mistral", "search"),
 }
 
+# Policy tokens (draft-kelley-aipref-training-preference-signal): robots.txt
+# groups that state how content may be used, not which crawler may fetch it.
+# Token -> purpose, in the aipref vocabulary. Kept apart from AI_CRAWLERS:
+# the * group never applies to them and they yield no crawler verdict.
+# Google-Extended and Applebot-Extended are, in the draft's terms, proprietary
+# policy tokens; they stay in AI_CRAWLERS for continuity with past snapshots.
+USAGE_TOKENS = {
+    "__usage_ai-training": "ai-training",
+}
+
 # Fetch
 CONCURRENCY = 15
 TIMEOUT = 15.0

@@ -48,6 +48,12 @@ Output: `census.db` (SQLite). Main tables:
   `instruction_signals` flag directive language aimed at LLMs ("you should",
   "when answering", citation requests) — boilerplate plugin preambles count
   too, so cross them with `signatures` to separate decided from inherited.
+- `usage_prefs` — domain × policy token: the usage preference a site binds
+  to `__usage_ai-training`
+  ([draft-kelley-aipref-training-preference-signal-00](https://datatracker.ietf.org/doc/draft-kelley-aipref-training-preference-signal/)).
+  `pref` ∈ {against, partial, in_favor, none} at the root; `exceptions` = 1
+  when the root is against and some path is allowed; `mixed_group` = 1 when
+  the token shares a group with crawler tokens.
 - `site_meta` — sector, CMS, SEO plugin, CDN.
 - `clusters` — template clusters (exact hash + Jaccard ≥ 0.8).
 - `fetches` — the raw source layer: bodies, headers, final URL, timestamp,
@@ -78,6 +84,14 @@ snapshots (temporal dimension) and multiple countries. Build locally:
   so token order doesn't split clusters.
 - **`purpose` (training/search)**: enables the coherence analysis
   (e.g. blocks training but not search, or vice versa).
+- **Policy token ≠ crawler**: `__usage_ai-training` states how content may
+  be used, not who may fetch it. It is matched exactly (case aside), the `*`
+  group never applies to it, and a file without the token expresses no
+  preference (§4.1–4.2 of the draft). It sits on the domain dimension
+  (`dw_dim_domain.ai_training_pref`), apart from the crawler verdicts it is
+  orthogonal to (§4.3). Google-Extended and Applebot-Extended are, in the
+  draft's terms, proprietary policy tokens; they stay in the crawler list
+  for continuity with earlier snapshots.
 - **www. fallback**: bare domains that fail DNS (common for PA sites,
   e.g. gov.it) are retried once with the `www.` prefix; `final_url`
   records what was actually fetched.
@@ -85,6 +99,11 @@ snapshots (temporal dimension) and multiple countries. Build locally:
 ## Limits to declare in the study
 
 - robots.txt measures declared intent, not crawler behavior.
+- The policy-token draft leaves precedence to each consumer (§4.5): an
+  operator may rank its own token (Google-Extended) above
+  `__usage_ai-training`. The census records both signals; which one a given
+  operator honors is not observable from robots.txt. Snapshots before
+  2026-10-30 predate the draft (the 2026-10-02 crawl has zero occurrences).
 - The CMS fingerprint is heuristic (false negatives on sites that mask it).
 - TDMRep is read through all three spec channels (well-known file,
   HTTP headers, HTML meta tags in the homepage).

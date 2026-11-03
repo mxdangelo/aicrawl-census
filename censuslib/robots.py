@@ -100,10 +100,12 @@ def verdict_for(robots: Robots, ua_token: str, path: str = "/"):
              allowed  -> no applicable restriction
     """
     rules, source = _select_group(robots, ua_token)
-    mentioned = source == "specific"
-    if not rules:
-        return "allowed", source, mentioned
+    return _evaluate(rules, path), source, source == "specific"
 
+
+def _evaluate(rules, path):
+    """blocked | partial | allowed for `path` under longest-match, Allow
+    winning ties."""
     best_len, best_type = -1, "allow"
     for rtype, pattern in rules:
         if pattern == "":
@@ -114,9 +116,40 @@ def verdict_for(robots: Robots, ua_token: str, path: str = "/"):
                 best_len, best_type = plen, rtype
 
     if best_type == "disallow":
-        return "blocked", source, mentioned
+        return "blocked"
     has_disallow = any(t == "disallow" and p for t, p in rules)
-    return ("partial" if has_disallow else "allowed"), source, mentioned
+    return "partial" if has_disallow else "allowed"
+
+
+def usage_pref(robots: Robots, token: str, path: str = "/"):
+    """Usage preference bound to a policy token
+    (draft-kelley-aipref-training-preference-signal-00).
+
+    Returns (pref, exceptions, mixed):
+      pref        against  -> path disallowed for the token
+                  partial  -> path allowed, other paths disallowed
+                  in_favor -> no path disallowed
+                  none     -> no group names the token: no preference
+      exceptions  1 when `pref` is against and some path is allowed
+                  (Figure 1 of the draft: Disallow: / + Allow: /press-kit/)
+      mixed       1 when a group binds the token together with other agents
+
+    Unlike verdict_for, the token is matched exactly (case aside, §4.1) and
+    the * group never applies (§4.2). The result is independent of the
+    crawler verdicts (§4.3): it says how content may be used, not fetched.
+    """
+    tok = token.lower()
+    groups = [g for g in robots.groups if tok in g.agents]
+    if not groups:
+        return "none", 0, 0
+    rules = [r for g in groups for r in g.rules]
+    verdict = _evaluate(rules, path)
+    pref = {"blocked": "against", "partial": "partial",
+            "allowed": "in_favor"}[verdict]
+    exceptions = int(pref == "against"
+                     and any(t == "allow" and p for t, p in rules))
+    mixed = int(any(len(set(g.agents)) > 1 for g in groups))
+    return pref, exceptions, mixed
 
 
 def as_dict(robots: Robots) -> dict:

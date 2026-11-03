@@ -2,7 +2,7 @@
 
 Usage: python run_parse.py
 Reads the fetches table, writes files, verdicts, robots_meta, llms_meta,
-tdmrep_meta and updates site_meta with the CMS fingerprint.
+tdmrep_meta, usage_prefs and updates site_meta with the CMS fingerprint.
 """
 import json
 
@@ -22,7 +22,9 @@ def decode(body: bytes) -> str:
 def main():
     con = db.connect(config.DB_PATH)
     domains = [r[0] for r in con.execute("SELECT domain FROM site_meta")]
-    ai_tokens = list(config.AI_CRAWLERS)
+    # policy-token groups belong to the AI block too, so templates that add
+    # them split from those that do not
+    ai_tokens = list(config.AI_CRAWLERS) + list(config.USAGE_TOKENS)
 
     for dom in domains:
         rows = {r[0]: r for r in con.execute(
@@ -51,11 +53,19 @@ def main():
                     con.execute(
                         "INSERT OR REPLACE INTO verdicts VALUES (?,?,?,?,?,?,?)",
                         (dom, token, op, purpose, int(mentioned), verdict, source))
+                for token in config.USAGE_TOKENS:
+                    con.execute(
+                        "INSERT OR REPLACE INTO usage_prefs VALUES (?,?,?,?,?)",
+                        (dom, token, *rb.usage_pref(parsed, token)))
             else:
                 for token, (op, purpose) in config.AI_CRAWLERS.items():
                     con.execute(
                         "INSERT OR REPLACE INTO verdicts VALUES (?,?,?,?,?,?,?)",
                         (dom, token, op, purpose, 0, "allowed", "no_robots"))
+                for token in config.USAGE_TOKENS:
+                    con.execute(
+                        "INSERT OR REPLACE INTO usage_prefs VALUES (?,?,?,?,?)",
+                        (dom, token, "none", 0, 0))
 
         # ---- llms.txt + llms-full.txt ----
         full_ok, full_text = False, ""
